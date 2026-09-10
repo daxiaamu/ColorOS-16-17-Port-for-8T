@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.apk
+*.apex
+*.img
+*.bin
+*.zip
+*.so
+*.dex
+*.jks
+*.keystore
+*.pem
+*.key
+.env
