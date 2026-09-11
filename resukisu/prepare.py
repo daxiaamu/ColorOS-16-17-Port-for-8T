@@ -18,6 +18,7 @@ K=W/'src/kernel/msm'
 clone(S['kernel_repo'],S['kernel_commit'],K)
 clone(S['modules_repo'],S['modules_commit'],W/'modules')
 (W/'src/vendor').symlink_to('../modules/vendor',target_is_directory=True)
+(K.parent/'msm-4.19').symlink_to('msm',target_is_directory=True)
 shutil.copytree(W/'modules/kernel/msm-4.19/techpack',K/'techpack',dirs_exist_ok=True,symlinks=True)
 shutil.copytree(W/'modules/vendor/qcom/opensource/audio-kernel',K/'techpack/audio',symlinks=True)
 clone(S['resukisu_repo'],S['resukisu_commit'],K/'KernelSU',full=True)
