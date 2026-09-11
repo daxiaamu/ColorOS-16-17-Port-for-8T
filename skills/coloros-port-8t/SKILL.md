@@ -26,6 +26,7 @@ description: 为一加 8T 移植和调试 ColorOS 提供供体评估与新 ROM �
 | 固化、TWRP 完整包、跨底包安装、公开发布 | [release](references/release.md)：不可变候选与分层验收 |
 | 已适配完成，提供新供体 ZIP | [donor-update](references/donor-update.md)：基线索引、差异计划、补丁复用/退役、受影响回归 |
 | data 自动预装、split 缺失、TWRP 不识别 data | [native-preload](references/native-preload.md)：真实挂载、PMS 原生扫描与安装时序 |
+| 晕动舒缓无点阵、自动乘车不生效 | [motion-relief](references/motion-relief.md)：实际传感器、官方 CMC 协议与设置页状态重置 |
 | 需要追溯实现来源 | [sources](references/sources.md)：查询原始项目并锁定版本 |
 
 ## 选择修复的顺序
