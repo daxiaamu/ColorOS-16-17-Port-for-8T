@@ -53,3 +53,7 @@ python -m unittest discover -s tests -v
 本仓库发布重新整理的说明、原创辅助脚本及作者提供的实机展示截图，不包含 OEM APK/ROM、反编译文件、设备校准与身份备份、私钥、原始日志或其他用户媒体。也未附未经完整验证的自动刷机脚本。
 
 原创内容采用 [MIT License](LICENSE)。第三方项目仅链接并注明用途，其许可独立适用。后续合入第三方代码必须保留对应许可与归属。原始资料中的过时“待修复”与后续结论已按最新证据重新归类，未把研究项目当成已合入功能。
+
+## ReSukiSU Actions
+
+[Build boot.img/TWRP and fetch the matching official APK](resukisu/README.md). This optional pipeline is specific to the pinned ColorOS 16 / OnePlus 8T boot base. Artifacts are test builds pending device validation.

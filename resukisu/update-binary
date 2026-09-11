@@ -1,0 +1,50 @@
+#!/sbin/sh
+# Current-slot-only installer for the verified 19805 board and exact boot base.
+set -eu
+OUTFD=$2
+ZIP=$3
+ui() { printf 'ui_print %s\nui_print\n' "$*" > "/proc/self/fd/$OUTFD"; }
+abort() { ui "ERROR: $*"; exit 1; }
+[ "$(getprop sys.boot_completed)" != 1 ] || abort '请在 TWRP 中安装 / Recovery installation required'
+project=$(getprop ro.boot.project_name)
+hardware_project=$(cat /proc/oplusVersion/prjName 2>/dev/null || true)
+case "$project" in ''|0) project=;; esac
+case "$hardware_project" in ''|0) hardware_project=;; esac
+[ -z "$project" ] || [ "$project" = 19805 ] || abort '不是一加 8T / Wrong boot project'
+[ -z "$hardware_project" ] || [ "$hardware_project" = 19805 ] || abort '不是一加 8T / Wrong hardware project'
+[ "$project" = 19805 ] || [ "$hardware_project" = 19805 ] || abort '无法确认 8T / Missing 8T hardware identity'
+SLOT=$(getprop ro.boot.slot_suffix)
+case "$SLOT" in _a|_b) ;; *) abort '无法确定当前槽位 / Unknown slot';; esac
+PART="/dev/block/by-name/boot$SLOT"
+[ -b "$PART" ] || abort '找不到启动分区 / Boot partition missing'
+[ "$(blockdev --getsize64 "$PART")" = 100663296 ] || abort '启动分区大小不符 / Unexpected partition size'
+# Generated from the exact base and result images. No eval or sourced ZIP content.
+FROM_HASH='@FROM_HASH@'
+TO_HASH='@TO_HASH@'
+ACTUAL=$(sha256sum "$PART" | cut -d ' ' -f1)
+[ "$ACTUAL" != "$TO_HASH" ] || { ui '已安装此版本 / Already installed'; exit 0; }
+[ "$ACTUAL" = "$FROM_HASH" ] || abort 'boot 基线不匹配；请先恢复对应原版 / Incompatible boot; restore matching base first'
+TMP=$(mktemp -d /tmp/resukisu8t.XXXXXX) || abort 'Cannot create temporary directory'
+trap 'rm -rf "$TMP"' EXIT
+unzip -p "$ZIP" images/boot.img > "$TMP/new.img" || abort '解压失败 / Extraction failed'
+[ "$(wc -c < "$TMP/new.img" | tr -d ' ')" = 100663296 ] || abort 'Invalid image size'
+[ "$(sha256sum "$TMP/new.img" | cut -d ' ' -f1)" = "$TO_HASH" ] || abort '镜像校验失败 / Image hash mismatch'
+BACKUPDIR=/sdcard/ReSukiSU-8T-backup
+mkdir -p "$BACKUPDIR" || abort '请先解密/挂载 data / Mount decrypted data for backup'
+BACKUP="$BACKUPDIR/boot${SLOT}_${ACTUAL}.img"
+if [ -f "$BACKUP" ]; then
+ [ "$(sha256sum "$BACKUP" | cut -d ' ' -f1)" = "$FROM_HASH" ] || abort 'Existing backup is invalid'
+else
+ dd if="$PART" of="$BACKUP" bs=1048576 || abort '备份失败 / Backup failed'
+ [ "$(sha256sum "$BACKUP" | cut -d ' ' -f1)" = "$FROM_HASH" ] || abort '备份校验失败 / Backup hash mismatch'
+fi
+ui "写入当前槽位 $SLOT / Writing current slot $SLOT"
+if dd if="$TMP/new.img" of="$PART" bs=1048576 conv=fsync && [ "$(sha256sum "$PART" | cut -d ' ' -f1)" = "$TO_HASH" ]; then
+ ui '完成；请手动重启 / Done; reboot manually'
+ ui "原 boot 备份 / Backup: $BACKUP"
+else
+ ui '写入失败，正在恢复备份 / Write failed; restoring backup'
+ dd if="$BACKUP" of="$PART" bs=1048576 conv=fsync || abort '恢复失败，请勿重启 / Restore failed; do not reboot'
+ [ "$(sha256sum "$PART" | cut -d ' ' -f1)" = "$FROM_HASH" ] || abort '恢复校验失败，请勿重启 / Restore verification failed; do not reboot'
+ abort '已恢复原 boot / Original boot restored'
+fi

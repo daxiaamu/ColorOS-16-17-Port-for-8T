@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT=$(pwd)
+python3 resukisu/prepare.py
+python3 resukisu/verify_manager_compatibility.py build/src/kernel/msm/KernelSU/kernel
+NDK="$ANDROID_HOME/ndk/21.4.7075529/toolchains/llvm/prebuilt/linux-x86_64/bin"
+export PATH="$ROOT/build/bin:$NDK:$PATH"
+export KBUILD_BUILD_USER=daxiaamu KBUILD_BUILD_HOST=github-actions
+export KBUILD_BUILD_TIMESTAMP='Sat Sep 12 00:00:00 UTC 2026'
+cd build/src/kernel/msm
+ARGS=(O="$ROOT/build/out" ARCH=arm64 LLVM=1 LLVM_IAS=1 CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi- CLANG_TRIPLE=aarch64-linux-gnu- LOCALVERSION=+ OPLUS_FEATURE_SECURE_ROOTGUARD=no OPLUS_FEATURE_SECURE_MOUNTGUARD=no OPLUS_FEATURE_SECURE_EXECGUARD=no)
+make "${ARGS[@]}" olddefconfig 2>&1 | tee "$ROOT/build/configure.log"
+for flag in CONFIG_KSU=y CONFIG_KSU_MANUAL_HOOK=y CONFIG_KSU_MULTI_MANAGER_SUPPORT=y CONFIG_SECURITY_SELINUX=y CONFIG_MODVERSIONS=y; do
+ grep -qx "$flag" "$ROOT/build/out/.config"
+done
+make -j"$(nproc)" "${ARGS[@]}" Image 2>&1 | tee "$ROOT/build/kernel.log"
+cd "$ROOT"
+mkdir -p kernel-output
+cp build/out/arch/arm64/boot/Image kernel-output/Image
+cp build/out/.config kernel-output/kernel.config
+cp build/out/Module.symvers kernel-output/
+cp build/manual-hooks.patch resukisu/sources.json kernel-output/
+git -C build/src/kernel/msm diff --binary > kernel-output/kernel-build.patch
+python3 - <<'PY'
+from pathlib import Path
+p=Path('kernel-output/Image'); b=p.read_bytes()
+assert len(b)>8*1024*1024 and b[56:60]==b'ARM\x64', 'Not an arm64 Image'
+assert b'ReSukiSU' in b, 'ReSukiSU is missing from kernel'
+PY

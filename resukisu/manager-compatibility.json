@@ -1,0 +1,12 @@
+{
+  "official_certificate_sha256": "d3469712b6214462764a1d8d3e5cbe1d6819a0b629791b9f4101867821f1df64",
+  "official_certificate_size": 887,
+  "apk_signature_scheme": "v2 only, validated by apksigner",
+  "verified_apk": "ReSukiSU_v4.2.0-rc1_35134-arm64-v8a-release.apk",
+  "verified_apk_sha256": "04dfe68cdce7d1284f52f4953ffde9403f03243804fde56a5b739d920b230d82",
+  "official_actions_run": "https://github.com/ReSukiSU/ReSukiSU/actions/runs/34628711668",
+  "official_actions_artifact": "Manager-release",
+  "telegram_user_supplied_apk": "byte-identical to official Actions arm64 artifact",
+  "runtime_device_validation": "pending",
+  "temporary_PR_signing_keys": "not accepted by default"
+}

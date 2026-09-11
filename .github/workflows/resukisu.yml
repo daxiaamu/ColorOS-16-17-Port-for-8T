@@ -1,0 +1,81 @@
+name: ReSukiSU for OnePlus 8T
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/resukisu.yml'
+      - 'resukisu/**'
+permissions:
+  contents: read
+concurrency:
+  group: resukisu-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  kernel:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: android-actions/setup-android@v3
+      - name: Install kernel toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y build-essential flex bison bc libssl-dev libelf-dev python3 cpio rsync
+          sdkmanager 'ndk;21.4.7075529'
+      - name: Build official 4.19 kernel with ReSukiSU
+        run: bash resukisu/build_kernel.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kernel-build-logs
+          path: |
+            build/*.log
+            build/out/.config
+          include-hidden-files: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kernel
+          path: kernel-output/
+          if-no-files-found: error
+  manager:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch matching APK from official Actions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 resukisu/fetch_official_manager.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ReSukiSU-official-manager-APK
+          path: manager-output/
+          if-no-files-found: error
+  package:
+    needs: [kernel, manager]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: kernel
+          path: kernel-output
+      - name: Build boot image and TWRP installers
+        run: python3 resukisu/package.py
+      - name: Test installer guards without accessing devices
+        run: python3 resukisu/test_installer.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ReSukiSU-boot-img
+          path: dist/boot.img
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ReSukiSU-TWRP
+          path: |
+            dist/*.zip
+            dist/*.json
+            dist/*.txt
+            dist/*.md
+          if-no-files-found: error

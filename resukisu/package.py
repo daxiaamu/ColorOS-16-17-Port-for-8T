@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import hashlib,gzip,json,os,shutil,subprocess,urllib.request,zipfile
+R=Path(__file__).resolve().parent; S=json.loads((R/'sources.json').read_text()); W=Path('packaging-work').resolve(); W.mkdir(); D=Path('dist').resolve(); D.mkdir()
+def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+def fetch(url,path,digest):
+ subprocess.run(['curl','-fL','--retry','3','--connect-timeout','30',url,'-o',str(path)],check=True)
+ assert sha(path)==digest, f'Download hash mismatch: {url}'
+fetch(S['base_boot_url'],W/'base.gz',S['base_boot_gz_sha256'])
+base=W/'base.img'; base.write_bytes(gzip.decompress((W/'base.gz').read_bytes())); assert sha(base)==S['base_boot_sha256']
+fetch('https://github.com/topjohnwu/Magisk/releases/download/v30.7/Magisk-v30.7.apk',W/'Magisk.apk','e0d32d2123532860f97123d927b1bb86c4e08e6fd8a48bfc6b5bee0afae9ebd5')
+mb=W/'magiskboot'
+with zipfile.ZipFile(W/'Magisk.apk') as z: mb.write_bytes(z.read('lib/x86_64/libmagiskboot.so'))
+mb.chmod(0o755)
+def run(*args,cwd): subprocess.run([str(mb),*map(str,args)],cwd=cwd,check=True)
+work=W/'repack'; work.mkdir(); run('unpack','-h',base,cwd=work)
+original={p.name:sha(p) for p in work.iterdir() if p.is_file() and p.name!='kernel'}
+assert 'ramdisk.cpio' in original and 'dtb' in original
+# Reject rooted/private boot inputs, even if a future lockfile accidentally points to one.
+run('cpio','ramdisk.cpio','test',cwd=work)
+ramdisk=(work/'ramdisk.cpio').read_bytes()
+for marker in [b'adb_keys',b'init.magisk.rc',b'.backup/.magisk',b'overlay.d/sbin']:
+ assert marker not in ramdisk, f'Unexpected root/private boot content: {marker}'
+shutil.copyfile('kernel-output/Image',work/'kernel')
+run('repack',base,D/'boot.img',cwd=work)
+p=D/'boot.img'; assert p.stat().st_size<=S['boot_partition_bytes']
+with p.open('ab') as f: f.write(b'\0'*(S['boot_partition_bytes']-p.stat().st_size))
+verify=W/'verify'; verify.mkdir(); run('unpack','-h',p,cwd=verify)
+assert sha(verify/'kernel')==sha(Path('kernel-output/Image'))
+for name,digest in original.items(): assert sha(verify/name)==digest, f'Boot component changed: {name}'
+newsha=sha(p)
+manifest={'status':'compiled-and-offline-verified; NOT device-boot-tested','device':'OnePlus 8T KB2000 / project 19805','slot_policy':'current only; no slot switch','base_boot_sha256':S['base_boot_sha256'],'boot_sha256':newsha,'boot_bytes':p.stat().st_size,'preserved_components':original,'source_locks':S,'module_abi_runtime_validation':'pending','selinux':'original enforcing configuration retained','manager_support':'official ReSukiSU Actions/TG certificate; see manager-compatibility.json'}
+(D/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+for name,source,from_hash,to_hash in [('ReSukiSU-8T-TWRP.zip',p,S['base_boot_sha256'],newsha),('ReSukiSU-8T-restore-TWRP.zip',base,newsha,S['base_boot_sha256'])]:
+ script=(R/'update-binary').read_text().replace('@FROM_HASH@',from_hash).replace('@TO_HASH@',to_hash)
+ with zipfile.ZipFile(D/name,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
+  entry=zipfile.ZipInfo('META-INF/com/google/android/update-binary'); entry.external_attr=0o100755<<16; z.writestr(entry,script)
+  z.writestr('META-INF/com/google/android/updater-script','# Handled by update-binary\n')
+  z.write(source,'images/boot.img'); z.write(D/'manifest.json','manifest.json')
+ with zipfile.ZipFile(D/name) as z: assert z.testzip() is None
+shutil.copyfile(R/'README.md',D/'README.md')
+shutil.copyfile(R/'manager-compatibility.json',D/'manager-compatibility.json')
+(D/'SHA256SUMS.txt').write_text(''.join(f'{sha(p)}  {p.name}\n' for p in sorted(D.iterdir()) if p.is_file()))
+print(json.dumps(manifest,indent=2))
