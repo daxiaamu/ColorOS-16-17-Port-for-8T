@@ -42,6 +42,7 @@
 - 小布应用更新与系统兼容分开：原厂唤醒 APK/JNI/ODM/DSP 配套必须成套；AI 实景入口或小布通话内部/云端判断不保证永久免维护。
 - Settings/MOD、Launcher 返回小布圆角、应用找回、相册实况限制：逐项追踪类、资源和行为，不把整个旧 Settings/Launcher 覆盖到新供体来“省事”。
 - [userdata 预装](native-preload.md)中的 loop 挂载、PackageManager cluster 复制、重复包优先级、PMS 路径清单及升级/卸载记录。
+- [扫一扫 Camera2 路由](scanner-camera2.md)：核对工厂与项目判定、SDK 依赖；版本属性的网络请求头消费者。APK 内容或依赖变化时重新定位，不直接移植旧工厂类。
 - 最终固件前置检查、当前槽位、完整 super 元数据、无 ROOT 清理以及无自动 Format Data 规则。
 
 ## 构建和验收

@@ -20,6 +20,7 @@
 
 - [供体新 ROM 快速适配](skills/coloros-port-8t/references/donor-update.md)
 - [userdata 原生预装与 TWRP data 修复](skills/coloros-port-8t/references/native-preload.md)
+- [小布扫一扫 Camera2 与版本属性兼容](skills/coloros-port-8t/references/scanner-camera2.md)
 - [当前状态与验证边界](skills/coloros-port-8t/references/current-status.md)
 - [供体选择、首次启动与 APEX/EROFS](skills/coloros-port-8t/references/boot-and-build.md)
 - [显示、指纹、振动、三段键与音频](skills/coloros-port-8t/references/hardware.md)
@@ -29,7 +30,7 @@
 - [TWRP 打包、回归、发布与回退](skills/coloros-port-8t/references/release.md)
 - [参考来源及用途](skills/coloros-port-8t/references/sources.md)
 
-截至 2026-09-11，主线为 Reno15c PMD110 16.0.10.501 → 8T KB2000。r15 候选镜像已在官方 OS13 底层固件、DDR4、B 槽完成手动格式化后的首启、自动预装及正常重启；新 r15 ZIP 已完成离线校验与交付，整包刷入和覆盖升级尚待单独验收。ColorOS 17 与 DDR5 未据此宣称已验证。
+截至 2026-09-11，主线为 Reno15c PMD110 16.0.10.501 → 8T KB2000。r15 候选镜像已在官方 OS13 底层固件、DDR4、B 槽完成手动格式化后的首启、自动预装及正常重启；最新 20260911 完整包已合入晕动舒缓、扫一扫 Camera2 兼容及 super 容量下限检查，完成离线校验与 NAS 交付；扫一扫和版本号已完成候选镜像重启验证。最终 ZIP 整包刷入、覆盖升级及扩容 super 实机仍待单独验收。ColorOS 17 与 DDR5 未据此宣称已验证。
 
 ## 供体更新时使用
 
