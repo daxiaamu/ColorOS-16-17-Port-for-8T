@@ -33,4 +33,3 @@ edit('drivers/Makefile',[('# SPDX-License-Identifier: GPL-2.0','# SPDX-License-I
 edit('drivers/Kconfig',[('menu "Device Drivers"','menu "Device Drivers"\nsource "drivers/kernelsu/Kconfig"',1)])
 (r/'drivers/kernelsu').symlink_to('../KernelSU/kernel',target_is_directory=True)
 a.patch_out.write_text(''.join(diffs)); print('Manual hooks applied:',a.patch_out)
-
