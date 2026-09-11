@@ -6,7 +6,7 @@
 
 ## 实机截图
 
-[查看全部 42 张 ColorOS 16 一加 8T 截图](screenshots/README.md)。
+[查看全部 43 张 ColorOS 16 一加 8T 截图](screenshots/README.md)。
 
 ## 使用
 
