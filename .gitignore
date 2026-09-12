@@ -12,3 +12,6 @@ __pycache__/
 *.pem
 *.key
 .env
+
+# Public OEM module verification certificate extracted from the authorized boot input.
+!resukisu/kebab-stock-module-cert.pem

@@ -42,6 +42,8 @@ jobs:
           restore-keys: kernel-ccache-${{ hashFiles('resukisu/sources.json') }}-
       - name: Build official 4.19 kernel with ReSukiSU
         run: bash resukisu/build_kernel.sh
+      - name: Verify OEM module certificate and vendor ABI
+        run: python3 resukisu/verify_vendor_compatibility.py kernel-output/Image kernel-output/Module.symvers --report build/vendor-compatibility.json
       - uses: actions/cache/save@v4
         if: always()
         with:
@@ -53,6 +55,7 @@ jobs:
           name: kernel-build-logs
           path: |
             build/*.log
+            build/vendor-compatibility.json
             build/out/.config
           include-hidden-files: true
       - uses: actions/upload-artifact@v4
