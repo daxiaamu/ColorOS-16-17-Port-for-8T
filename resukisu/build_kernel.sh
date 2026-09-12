@@ -17,7 +17,7 @@ make "${ARGS[@]}" olddefconfig 2>&1 | tee "$ROOT/build/configure.log"
 for flag in CONFIG_KSU=y CONFIG_KSU_MANUAL_HOOK=y CONFIG_KSU_MULTI_MANAGER_SUPPORT=y CONFIG_SECURITY_SELINUX=y CONFIG_MODVERSIONS=y; do
  grep -qx "$flag" "$ROOT/build/out/.config"
 done
-make -j"$(nproc)" "${ARGS[@]}" Image 2>&1 | tee "$ROOT/build/kernel.log"
+make -k -j"$(nproc)" "${ARGS[@]}" Image 2>&1 | tee "$ROOT/build/kernel.log"
 cd "$ROOT"
 mkdir -p kernel-output
 cp build/out/arch/arm64/boot/Image kernel-output/Image

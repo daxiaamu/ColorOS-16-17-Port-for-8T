@@ -34,6 +34,9 @@ for base in [K,W/'modules']:
 # GNU empty aggregate initialization is equivalent to zero initialization, and
 # avoids Clang 10's nested-aggregate missing-braces diagnostic in vendor code.
 fixes=[
+ (K/'drivers/soc/oplus/storage/common/io_metrics/block_metrics.c','= {0};','= {};',3),
+ (K/'drivers/soc/oplus/storage/common/io_metrics/f2fs_metrics.c','= {0};','= {};',2),
+ (K/'drivers/soc/oplus/storage/common/io_metrics/ufs_metrics.c','= {0};','= {};',2),
  (K/'drivers/power/oplus/v1/voocphy/oplus_voocphy.c','= {0};','= {};',13),
  (K/'drivers/power/oplus/v1/wireless_ic/oplus_nu1619.c','[TABLE_MAX] = {0};','[TABLE_MAX] = {};',5),
  (K/'drivers/power/oplus/v1/vooc_ic/oplus_vooc_fw.c','= {0};','= {};',6),
