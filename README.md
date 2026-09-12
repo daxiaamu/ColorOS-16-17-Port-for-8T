@@ -56,4 +56,4 @@ Skill 与截图部分发布重新整理的说明、原创辅助脚本及作者�
 
 ## ReSukiSU Actions
 
-[ReSukiSU 构建说明](resukisu/README.md)：编译配套内核并输出 boot.img、TWRP 补丁及回退包，直接获取固定版本的官方 Actions APK，不重新编译或重签名管理器。工作流核对官方源码提交、APK 整包 SHA256 和签名证书。仅适用于锁定的 ColorOS 16 / 一加 8T boot 基线；未完成实机验证的产物标为测试构建。
+[ReSukiSU 构建说明](resukisu/README.md)：编译配套内核并输出 ReSukiSU TWRP 补丁和其中同一份成品 boot.img（仅打包一次，不生成官方镜像还原包），直接获取固定版本的官方 Actions APK，不重新编译或重签名管理器。工作流核对官方源码提交、APK 整包 SHA256 和签名证书。仅适用于锁定的 ColorOS 16 / 一加 8T boot 基线；未完成实机验证的产物标为测试构建。

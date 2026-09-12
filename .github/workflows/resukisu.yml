@@ -89,7 +89,7 @@ jobs:
         with:
           name: kernel
           path: kernel-output
-      - name: Build boot image and TWRP installers
+      - name: Repack ReSukiSU boot once and create TWRP ZIP
         run: python3 resukisu/package.py
       - name: Test installer guards without accessing devices
         run: python3 resukisu/test_installer.py
@@ -102,7 +102,7 @@ jobs:
         with:
           name: ${{ needs.metadata.outputs.prefix }}_kebab_TWRP
           path: |
-            dist/*.zip
+            dist/*_kebab_TWRP.zip
             dist/*.json
             dist/*.txt
             dist/*.md

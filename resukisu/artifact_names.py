@@ -15,7 +15,7 @@ def artifact_names(build_date=None):
  prefix=f'ReSukiSU_{version}_{code}_{date}'
  return {'prefix':prefix,'version':version,'version_code':code,'build_date':date,
          'boot':prefix+'_kebab_boot.img','twrp':prefix+'_kebab_TWRP.zip',
-         'restore':prefix+'_kebab_restore-TWRP.zip','apk':prefix+'_arm64-v8a-release.apk'}
+         'apk':prefix+'_arm64-v8a-release.apk'}
 
 if __name__=='__main__':
  names=artifact_names()

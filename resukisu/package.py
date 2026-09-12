@@ -33,13 +33,18 @@ for name,digest in original.items(): assert sha(verify/name)==digest, f'Boot com
 newsha=sha(p)
 manifest={'artifact_names':N,'status':'compiled-and-offline-verified; NOT device-boot-tested','device':'OnePlus 8T KB2000 / project 19805','slot_policy':'current only; no slot switch','base_boot_sha256':S['base_boot_sha256'],'boot_sha256':newsha,'boot_bytes':p.stat().st_size,'preserved_components':original,'source_locks':S,'module_abi_runtime_validation':'pending','selinux':'original enforcing configuration retained','manager_support':'official ReSukiSU Actions/TG certificate; see manager-compatibility.json'}
 (D/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
-for name,source,from_hash,to_hash in [(N['twrp'],p,S['base_boot_sha256'],newsha),(N['restore'],base,newsha,S['base_boot_sha256'])]:
- script=(R/'update-binary').read_text().replace('@FROM_HASH@',from_hash).replace('@TO_HASH@',to_hash)
- with zipfile.ZipFile(D/name,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
-  entry=zipfile.ZipInfo('META-INF/com/google/android/update-binary'); entry.external_attr=0o100755<<16; z.writestr(entry,script)
-  z.writestr('META-INF/com/google/android/updater-script','# Handled by update-binary\n')
-  z.write(source,'images/boot.img'); z.write(D/'manifest.json','manifest.json')
- with zipfile.ZipFile(D/name) as z: assert z.testzip() is None
+# The standalone download and ZIP payload share this single repacked image.
+script=(R/'update-binary').read_text().replace('@FROM_HASH@',S['base_boot_sha256']).replace('@TO_HASH@',newsha)
+with zipfile.ZipFile(D/N['twrp'],'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
+ entry=zipfile.ZipInfo('META-INF/com/google/android/update-binary'); entry.external_attr=0o100755<<16; z.writestr(entry,script)
+ z.writestr('META-INF/com/google/android/updater-script','# Handled by update-binary\n')
+ z.write(p,'images/boot.img'); z.write(D/'manifest.json','manifest.json')
+with zipfile.ZipFile(D/N['twrp']) as z:
+ assert z.testzip() is None
+ digest=hashlib.sha256()
+ with z.open('images/boot.img') as payload:
+  for block in iter(lambda:payload.read(1024*1024),b''): digest.update(block)
+ assert digest.hexdigest()==newsha, 'Standalone boot differs from TWRP payload'
 shutil.copyfile(R/'README.md',D/'README.md')
 shutil.copyfile(R/'manager-compatibility.json',D/'manager-compatibility.json')
 (D/'SHA256SUMS.txt').write_text(''.join(f'{sha(p)}  {p.name}\n' for p in sorted(D.iterdir()) if p.is_file()))
