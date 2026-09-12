@@ -5,7 +5,9 @@ R=Path(__file__).resolve().parent; S=json.loads((R/'sources.json').read_text());
 D=Path('manager-output'); D.mkdir(); T=Path('official-manager-download'); T.mkdir()
 run_id=S['official_manager_run_id']
 # Validate exact upstream source pairing before downloading anything.
-req=urllib.request.Request(f'https://api.github.com/repos/ReSukiSU/ReSukiSU/actions/runs/{run_id}',headers={'User-Agent':'ColorOS8T-ReSukiSU-build'})
+headers={'User-Agent':'ColorOS8T-ReSukiSU-build','Accept':'application/vnd.github+json'}
+if os.environ.get('GH_TOKEN'): headers['Authorization']='Bearer '+os.environ['GH_TOKEN']
+req=urllib.request.Request(f'https://api.github.com/repos/ReSukiSU/ReSukiSU/actions/runs/{run_id}',headers=headers)
 with urllib.request.urlopen(req,timeout=30) as f: run=json.load(f)
 assert run['head_sha']==S['resukisu_commit'] and run['conclusion']=='success'
 assert run['event']!='pull_request','Do not use ephemeral PR-signing builds'
