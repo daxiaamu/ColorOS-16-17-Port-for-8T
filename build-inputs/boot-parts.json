@@ -1,0 +1,116 @@
+{
+  "parts": [
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part00",
+      "sha256": "9669c3d4a1a4bdc384fc8a0496dc43c34bd070566d055db6f01593b325a1dd4e",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part01",
+      "sha256": "eddb1a3e199ce74d3aeb2841c1bf341aff45d739fbfaead4a43498728241a102",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part02",
+      "sha256": "ac18a54e43e824b30d4d072c6b390ad929356331206b1b45e8a53fea6efbe35c",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part03",
+      "sha256": "7f4671e821bb3aaf5b5fef294a3bdda2546fd24e5e1dcba67407b94a950d0398",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part04",
+      "sha256": "50c7b444e4751211702e3bb4e06c9888244653bf49e1528c39883da813a5aa70",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part05",
+      "sha256": "19e46cc8e179d23004dfedb1767876e6a0c99dd68e700502f556ffa0ab0f0433",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part06",
+      "sha256": "5641fc09cc24dafd40f05e97ca788ffe2a93c9bddd657952323266de03d5f9e4",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part07",
+      "sha256": "a25ad5186165bf967f41741e33a558e22bd592f48bc0df6857166740dba04b00",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part08",
+      "sha256": "5e93cff7e21c60837b9a49797a73fe2eca26a65bfc9582d8efe638a4b20148b5",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part09",
+      "sha256": "b96411b17ce1bb16094aee6893620a5aaf4f605237a339a6063aaa1b43e0604f",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part10",
+      "sha256": "b054895cfdabb4d6684c080c833bdd90c78e60194742dd04598951bdd45f9e96",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part11",
+      "sha256": "c934e291e15b378465213785fd84703612e4716bbfc21b4edb586c278c0cf8e3",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part12",
+      "sha256": "e0ff17cfbad894c47d624f026b9a1c6beb5c69b53b2aea1d1cd24667e90e4cbb",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part13",
+      "sha256": "6451204352cefe3c9c739986195f675a1a68aaf693f0747435ca89717b65af97",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part14",
+      "sha256": "ab7ecea9c88744050d9d548ee492116489a6cddc30b198e6d5125a77cf496c01",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part15",
+      "sha256": "d4913e2f6563857d8c86f2151785f31f040402fb47a15b60ca7022b6dfba5832",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part16",
+      "sha256": "644f07fe5bd01dae38905d11f291baa00fa12773d0e329c84c30cb4c1e20e49a",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part17",
+      "sha256": "fe4869e6e522862b8b2a3a443379f35deca53fc7270e310b3392efcba01d2667",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part18",
+      "sha256": "d814ecbf3c4a5c12680169fc06a4ed634d7c5f50a6c6b06ff11613051ba582df",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part19",
+      "sha256": "9ca50918498ff2d87b5edc7339c2ba29e23f5e5253dbb9bac3dc41ba5bd0f0fd",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part20",
+      "sha256": "a987244d7a018af3d1734c19450446f8474ae0a910e9e8fa93f12c1e1c0957c3",
+      "bytes": 1048576
+    },
+    {
+      "name": "ColorOS16-8T-base-boot.img.gz.part21",
+      "sha256": "313f0c7d7fbb42970da26824a65ee7787de3f1234da4f127ef25f2c9ee3f3c39",
+      "bytes": 703589
+    }
+  ],
+  "assembled_name": "ColorOS16-8T-base-boot.img.gz",
+  "assembled_sha256": "b5819290c4ac99f39a49c9c4124d529503664d7caf5950008256173e131b5085"
+}

@@ -1,0 +1,35 @@
+name: Assemble authorized boot build input
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  assemble:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify authorized input parts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download resukisu-inputs-v1 --repo "$GITHUB_REPOSITORY" --pattern '*.part*' --dir parts
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          cfg=json.load(open('build-inputs/boot-parts.json'))
+          blocks=[]
+          for row in cfg['parts']:
+              b=(Path('parts')/row['name']).read_bytes()
+              assert len(b)==row['bytes'] and hashlib.sha256(b).hexdigest()==row['sha256'], row['name']
+              blocks.append(b)
+          b=b''.join(blocks)
+          assert hashlib.sha256(b).hexdigest()==cfg['assembled_sha256']
+          Path(cfg['assembled_name']).write_bytes(b)
+          PY
+      - name: Publish verified full input
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload resukisu-inputs-v1 ColorOS16-8T-base-boot.img.gz --clobber --repo "$GITHUB_REPOSITORY"
+          gh release edit resukisu-inputs-v1 --draft=false --prerelease --repo "$GITHUB_REPOSITORY"
