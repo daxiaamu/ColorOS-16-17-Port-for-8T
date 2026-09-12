@@ -31,6 +31,10 @@ for base in [K,W/'modules']:
    if p.is_symlink(): continue
    b=p.read_bytes()
    if b'\0' not in b and b'\r\n' in b: p.write_bytes(b.replace(b'\r\n',b'\n'))
+# Restore the network callback ABI already present in the stock vendor modules.
+for patch in sorted((R/'patches').glob('*.patch')):
+ run('git','-C',str(K),'apply','--check',str(patch))
+ run('git','-C',str(K),'apply',str(patch))
 # GNU empty aggregate initialization is equivalent to zero initialization, and
 # avoids Clang 10's nested-aggregate missing-braces diagnostic in vendor code.
 fixes=[
