@@ -34,9 +34,8 @@ for base in [K,W/'modules']:
 # GNU empty aggregate initialization is equivalent to zero initialization, and
 # avoids Clang 10's nested-aggregate missing-braces diagnostic in vendor code.
 fixes=[
- # The union definition remains packed; redundant parameter attributes break genksyms.
- (K/'drivers/platform/msm/gsi/gsi.c','union __packed gsi_channel_scratch val','union gsi_channel_scratch val',2),
- (K/'include/linux/msm_gsi.h','union __packed gsi_channel_scratch val','union gsi_channel_scratch val',2),
+ # Keep the packed union definition; genksyms cannot parse packed return types.
+ (K/'drivers/platform/msm/gsi/gsi.c','static union __packed gsi_channel_scratch __gsi_update_mhi_channel_scratch(','static union gsi_channel_scratch __gsi_update_mhi_channel_scratch(',1),
  (K/'drivers/soc/oplus/storage/common/io_metrics/block_metrics.c','= {0};','= {};',3),
  (K/'drivers/soc/oplus/storage/common/io_metrics/f2fs_metrics.c','= {0};','= {};',2),
  (K/'drivers/soc/oplus/storage/common/io_metrics/ufs_metrics.c','= {0};','= {};',2),
