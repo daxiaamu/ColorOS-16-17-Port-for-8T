@@ -29,3 +29,7 @@ Upstreams: [OnePlus kernel](https://github.com/OnePlusOSS/android_kernel_oneplus
 ## Stock vendor ABI repair
 
 The five-file networking backport in `patches/0001-net-fix-dst-negative-advice.patch` matches [OPPO official SM8250 commit 61c4792](https://github.com/oppo-source/android_kernel_oppo_sm8250/commit/61c479209b55fba89cf75de5867498f6bb75a24f) and [upstream fix 92f1655](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=92f1655aa2b2294d0b49925f3b875a634bd3b59e). It updates IPv4, IPv6 and XFRM implementations together with the callback signature and uses the correct RCU reset order. No symbol CRC rewriting, module-version bypass or signature-enforcement bypass is used. The OEM certificate is a public verification certificate, not a private signing key.
+
+## Kernel version suffix
+
+The kernel release is `4.19.157-perf-daxiaamu+`, set through the build argument `LOCALVERSION=-daxiaamu+` alongside the stock `CONFIG_LOCALVERSION="-perf"`. The build checks the generated release and its presence in Image, and includes `kernel-release.txt` in the kernel artifact. OEM certificate and vendor symbol CRC checks remain required; this suffix change has not been device-tested.
