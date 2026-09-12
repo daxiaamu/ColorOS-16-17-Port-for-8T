@@ -32,4 +32,15 @@ from pathlib import Path
 p=Path('kernel-output/Image'); b=p.read_bytes()
 assert len(b)>8*1024*1024 and b[56:60]==b'ARM\x64', 'Not an arm64 Image'
 assert b'ReSukiSU' in b, 'ReSukiSU is missing from kernel'
+import subprocess,json
+wanted={'_text','_end','__bss_start','__bss_stop','selinux_state'}
+symbols={}
+for line in subprocess.check_output(['aarch64-linux-gnu-nm','-n','build/out/vmlinux'],text=True).splitlines():
+ fields=line.split()
+ if len(fields)==3 and fields[2] in wanted: symbols[fields[2]]=int(fields[0],16)
+assert symbols.keys()==wanted, symbols
+assert symbols['_text'] <= symbols['__bss_start'] <= symbols['selinux_state'] < symbols['__bss_stop'] <= symbols['_end'], symbols
+assert symbols['_end']-symbols['_text'] < 100663296, symbols
+Path('kernel-output/kernel-layout.json').write_text(json.dumps({k:hex(v) for k,v in symbols.items()},indent=2)+'\n')
+
 PY

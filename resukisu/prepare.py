@@ -49,6 +49,14 @@ fixes=[
 for path,before,after,count in fixes:
  text=path.read_text(); assert text.count(before)==count,(path,before)
  path.write_text(text.replace(before,after))
+# RTIC must be within the normal BSS bounds, before debug sections reset the VMA.
+p=K/'arch/arm64/kernel/vmlinux.lds.S'; text=p.read_text()
+late="\t.bss : {\t\t\t/* bss segment\t\t*/\n         RTIC_BSS\n\t}"
+assert text.count(late)==1
+text=text.replace(late,'')
+assert text.count('SECTIONS\n{')==1
+text=text.replace('SECTIONS\n{','#undef BSS_FIRST_SECTIONS\n#define BSS_FIRST_SECTIONS RTIC_BSS\n\nSECTIONS\n{')
+p.write_text(text)
 run('python3',str(R/'prepare_hooks.py'),str(K),'--patch-out',str(W/'manual-hooks.patch'))
 p=K/'scripts/gcc-wrapper.py'; t=p.read_text()
 t=t.replace('print "error, forbidden warning:", m.group(2)','print("error, forbidden warning:", m.group(2))').replace('print line,','print(line, end="")').replace("print args[0] + ':',e.strerror","print(args[0] + ':',e.strerror)").replace("print 'Is your PATH set correctly?'","print('Is your PATH set correctly?')").replace("print ' '.join(args), str(e)","print(' '.join(args), str(e))").replace('stderr=subprocess.PIPE)','stderr=subprocess.PIPE, universal_newlines=True)')
