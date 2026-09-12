@@ -31,6 +31,16 @@ for base in [K,W/'modules']:
    if p.is_symlink(): continue
    b=p.read_bytes()
    if b'\0' not in b and b'\r\n' in b: p.write_bytes(b.replace(b'\r\n',b'\n'))
+# GNU empty aggregate initialization is equivalent to zero initialization, and
+# avoids Clang 10's nested-aggregate missing-braces diagnostic in vendor code.
+fixes=[
+ (K/'net/oplus_modules/data_module/dpi/dpi_core.c','dpi_tuple_t tuple = {0};','dpi_tuple_t tuple = {};',2),
+ (K/'drivers/power/oplus/v1/ufcs/oplus_ufcs_protocol.c','struct verify_request req = { 0 };','struct verify_request req = {};',1),
+ (K/'drivers/power/oplus/v1/ufcs/oplus_ufcs_protocol.c','struct verify_response resp = { 0 };','struct verify_response resp = {};',1),
+]
+for path,before,after,count in fixes:
+ text=path.read_text(); assert text.count(before)==count,(path,before)
+ path.write_text(text.replace(before,after))
 run('python3',str(R/'prepare_hooks.py'),str(K),'--patch-out',str(W/'manual-hooks.patch'))
 p=K/'scripts/gcc-wrapper.py'; t=p.read_text()
 t=t.replace('print "error, forbidden warning:", m.group(2)','print("error, forbidden warning:", m.group(2))').replace('print line,','print(line, end="")').replace("print args[0] + ':',e.strerror","print(args[0] + ':',e.strerror)").replace("print 'Is your PATH set correctly?'","print('Is your PATH set correctly?')").replace("print ' '.join(args), str(e)","print(' '.join(args), str(e))").replace('stderr=subprocess.PIPE)','stderr=subprocess.PIPE, universal_newlines=True)')

@@ -24,10 +24,20 @@ jobs:
       - name: Install kernel toolchain
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y build-essential flex bison bc libssl-dev libelf-dev python3 cpio rsync binutils-aarch64-linux-gnu
+          sudo apt-get install -y build-essential flex bison bc libssl-dev libelf-dev python3 cpio rsync binutils-aarch64-linux-gnu ccache
           sdkmanager 'ndk;21.4.7075529'
+      - uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/ccache
+          key: kernel-ccache-${{ hashFiles('resukisu/sources.json') }}-${{ github.run_id }}
+          restore-keys: kernel-ccache-${{ hashFiles('resukisu/sources.json') }}-
       - name: Build official 4.19 kernel with ReSukiSU
         run: bash resukisu/build_kernel.sh
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: ~/.cache/ccache
+          key: kernel-ccache-${{ hashFiles('resukisu/sources.json') }}-${{ github.run_id }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
