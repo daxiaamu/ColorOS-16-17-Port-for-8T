@@ -34,6 +34,7 @@ for base in [K,W/'modules']:
 # GNU empty aggregate initialization is equivalent to zero initialization, and
 # avoids Clang 10's nested-aggregate missing-braces diagnostic in vendor code.
 fixes=[
+ (K/'drivers/power/oplus/v1/vooc_ic/oplus_vooc_fw.c','= {0};','= {};',6),
  (K/'net/oplus_modules/data_module/dpi/dpi_core.c','dpi_tuple_t tuple = {0};','dpi_tuple_t tuple = {};',2),
  (K/'drivers/power/oplus/v1/ufcs/oplus_ufcs_protocol.c','struct verify_request req = { 0 };','struct verify_request req = {};',1),
  (K/'drivers/power/oplus/v1/ufcs/oplus_ufcs_protocol.c','struct verify_response resp = { 0 };','struct verify_response resp = {};',1),
