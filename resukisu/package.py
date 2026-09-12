@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import hashlib,gzip,json,os,shutil,subprocess,urllib.request,zipfile
+from artifact_names import artifact_names
+N=artifact_names()
 R=Path(__file__).resolve().parent; S=json.loads((R/'sources.json').read_text()); W=Path('packaging-work').resolve(); W.mkdir(); D=Path('dist').resolve(); D.mkdir()
 def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
 def fetch(url,path,digest):
@@ -22,16 +24,16 @@ ramdisk=(work/'ramdisk.cpio').read_bytes()
 for marker in [b'adb_keys',b'init.magisk.rc',b'.backup/.magisk',b'overlay.d/sbin']:
  assert marker not in ramdisk, f'Unexpected root/private boot content: {marker}'
 shutil.copyfile('kernel-output/Image',work/'kernel')
-run('repack',base,D/'boot.img',cwd=work)
-p=D/'boot.img'; assert p.stat().st_size<=S['boot_partition_bytes']
+run('repack',base,D/N['boot'],cwd=work)
+p=D/N['boot']; assert p.stat().st_size<=S['boot_partition_bytes']
 with p.open('ab') as f: f.write(b'\0'*(S['boot_partition_bytes']-p.stat().st_size))
 verify=W/'verify'; verify.mkdir(); run('unpack','-h',p,cwd=verify)
 assert sha(verify/'kernel')==sha(Path('kernel-output/Image'))
 for name,digest in original.items(): assert sha(verify/name)==digest, f'Boot component changed: {name}'
 newsha=sha(p)
-manifest={'status':'compiled-and-offline-verified; NOT device-boot-tested','device':'OnePlus 8T KB2000 / project 19805','slot_policy':'current only; no slot switch','base_boot_sha256':S['base_boot_sha256'],'boot_sha256':newsha,'boot_bytes':p.stat().st_size,'preserved_components':original,'source_locks':S,'module_abi_runtime_validation':'pending','selinux':'original enforcing configuration retained','manager_support':'official ReSukiSU Actions/TG certificate; see manager-compatibility.json'}
+manifest={'artifact_names':N,'status':'compiled-and-offline-verified; NOT device-boot-tested','device':'OnePlus 8T KB2000 / project 19805','slot_policy':'current only; no slot switch','base_boot_sha256':S['base_boot_sha256'],'boot_sha256':newsha,'boot_bytes':p.stat().st_size,'preserved_components':original,'source_locks':S,'module_abi_runtime_validation':'pending','selinux':'original enforcing configuration retained','manager_support':'official ReSukiSU Actions/TG certificate; see manager-compatibility.json'}
 (D/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
-for name,source,from_hash,to_hash in [('ReSukiSU-8T-TWRP.zip',p,S['base_boot_sha256'],newsha),('ReSukiSU-8T-restore-TWRP.zip',base,newsha,S['base_boot_sha256'])]:
+for name,source,from_hash,to_hash in [(N['twrp'],p,S['base_boot_sha256'],newsha),(N['restore'],base,newsha,S['base_boot_sha256'])]:
  script=(R/'update-binary').read_text().replace('@FROM_HASH@',from_hash).replace('@TO_HASH@',to_hash)
  with zipfile.ZipFile(D/name,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
   entry=zipfile.ZipInfo('META-INF/com/google/android/update-binary'); entry.external_attr=0o100755<<16; z.writestr(entry,script)

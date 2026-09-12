@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import hashlib,json,os,shutil,subprocess,urllib.request,zipfile
+from artifact_names import artifact_names
+N=artifact_names()
 R=Path(__file__).resolve().parent; S=json.loads((R/'sources.json').read_text()); C=json.loads((R/'manager-compatibility.json').read_text())
 D=Path('manager-output'); D.mkdir(); T=Path('official-manager-download'); T.mkdir()
 run_id=S['official_manager_run_id']
@@ -28,7 +30,7 @@ tools=sorted(sdk.glob('build-tools/*/apksigner')); assert tools,'Android apksign
 result=subprocess.run([str(tools[-1]),'verify','--verbose','--print-certs',str(apk)],check=True,capture_output=True,text=True)
 assert C['official_certificate_sha256'] in result.stdout
 assert 'Verified using v2 scheme (APK Signature Scheme v2): true' in result.stdout
-shutil.copyfile(apk,D/S['official_manager_apk'])
+shutil.copyfile(apk,D/N['apk'])
 (D/'apk-verification.txt').write_text(result.stdout)
-(D/'provenance.json').write_text(json.dumps({'official_run':run['html_url'],'source_commit':run['head_sha'],'apk_sha256':S['official_manager_sha256'],'recompiled':False,'resigned':False,'matches_supplied_telegram_apk':True},indent=2)+'\n')
+(D/'provenance.json').write_text(json.dumps({'output_filename':N['apk'],'original_filename':S['official_manager_apk'],'build_date':N['build_date'],'official_run':run['html_url'],'source_commit':run['head_sha'],'apk_sha256':S['official_manager_sha256'],'recompiled':False,'resigned':False,'matches_supplied_telegram_apk':True},indent=2)+'\n')
 print('Official Actions APK verified against source commit, full-file SHA256 and official signing certificate')

@@ -11,6 +11,15 @@ concurrency:
   group: resukisu-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  metadata:
+    runs-on: ubuntu-22.04
+    outputs:
+      prefix: ${{ steps.names.outputs.prefix }}
+      build_date: ${{ steps.names.outputs.build_date }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: names
+        run: python3 resukisu/artifact_names.py
   kernel:
     runs-on: ubuntu-22.04
     timeout-minutes: 150
@@ -52,6 +61,9 @@ jobs:
           path: kernel-output/
           if-no-files-found: error
   manager:
+    needs: metadata
+    env:
+      RESUKISU_BUILD_DATE: ${{ needs.metadata.outputs.build_date }}
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
@@ -62,11 +74,13 @@ jobs:
         run: python3 resukisu/fetch_official_manager.py
       - uses: actions/upload-artifact@v4
         with:
-          name: ReSukiSU-official-manager-APK
+          name: ${{ needs.metadata.outputs.prefix }}_official-manager-APK
           path: manager-output/
           if-no-files-found: error
   package:
-    needs: [kernel, manager]
+    needs: [metadata, kernel, manager]
+    env:
+      RESUKISU_BUILD_DATE: ${{ needs.metadata.outputs.build_date }}
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     steps:
@@ -81,12 +95,12 @@ jobs:
         run: python3 resukisu/test_installer.py
       - uses: actions/upload-artifact@v4
         with:
-          name: ReSukiSU-boot-img
-          path: dist/boot.img
+          name: ${{ needs.metadata.outputs.prefix }}_kebab_boot-img
+          path: dist/*_kebab_boot.img
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
-          name: ReSukiSU-TWRP
+          name: ${{ needs.metadata.outputs.prefix }}_kebab_TWRP
           path: |
             dist/*.zip
             dist/*.json
