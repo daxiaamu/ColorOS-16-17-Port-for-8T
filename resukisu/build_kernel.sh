@@ -6,6 +6,8 @@ python3 resukisu/verify_manager_compatibility.py build/src/kernel/msm/KernelSU/k
 NDK="$ANDROID_HOME/ndk/21.4.7075529/toolchains/llvm/prebuilt/linux-x86_64/bin"
 export PATH="$ROOT/build/bin:$NDK:$PATH"
 export CCACHE_DIR="$HOME/.cache/ccache" CCACHE_BASEDIR="$ROOT"
+export CCACHE_COMPILERCHECK=content
+trap 'ccache --show-stats' EXIT
 ccache --max-size=2G
 export KBUILD_BUILD_USER=daxiaamu KBUILD_BUILD_HOST=github-actions
 export KBUILD_BUILD_TIMESTAMP='Sat Sep 12 00:00:00 UTC 2026'
