@@ -4,8 +4,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import json, os, re
 
-def artifact_names(build_date=None):
- sources=json.loads(Path(__file__).with_name('sources.json').read_text())
+def artifact_names(build_date=None, sources=None):
+ if sources is None: sources=json.loads(Path(__file__).with_name('sources.json').read_text())
  match=re.fullmatch(r'ReSukiSU_(v[0-9][A-Za-z0-9.-]*)_([0-9]+)-arm64-v8a-release\.apk',sources['official_manager_apk'])
  if not match: raise ValueError('Unrecognized locked official APK filename')
  version,code=match.groups()

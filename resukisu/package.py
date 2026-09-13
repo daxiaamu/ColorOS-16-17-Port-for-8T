@@ -4,6 +4,8 @@ import hashlib,gzip,json,os,shutil,subprocess,urllib.request,zipfile
 from artifact_names import artifact_names
 N=artifact_names()
 R=Path(__file__).resolve().parent; S=json.loads((R/'sources.json').read_text()); W=Path('packaging-work').resolve(); W.mkdir(); D=Path('dist').resolve(); D.mkdir()
+assert json.loads(Path('kernel-output/sources.json').read_text()) == S, 'Kernel/package source locks differ'
+
 def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
 def fetch(url,path,digest):
  subprocess.run(['curl','-fL','--retry','3','--connect-timeout','30',url,'-o',str(path)],check=True)
