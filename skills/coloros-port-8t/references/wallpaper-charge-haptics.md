@@ -10,7 +10,7 @@
 
 The local SystemUI candidate reads board first API only for the KB2000 special-color gate, falling back to the original product value if absent. Global properties and other models remain unchanged. LocationBasedBatteryViewModel additionally requires SuperVOOC and CPA watts >=33 for blue, or >=100 for purple. With the special-color gate disabled, native charging green is expected. Recheck resource names and values on donor updates; do not reuse numeric resource IDs blindly.
 
-Both query-4 framework and local SystemUI candidates are now temporarily loaded. Framework restart succeeded; runtime dump reports voocSpecialColorShow=true. Ordinary USB remains non-SuperVOOC with watts=0. Real non-full 65W color, unplug and full-charge regression remain pending; neither candidate is staged or released. Retained APK signer metadata does not mean a modified APK has a valid OEM signature: this system-partition candidate is not an ordinary app update.
+Both query-4 framework and local SystemUI candidates are now temporarily loaded. Framework restart succeeded; runtime dump reports voocSpecialColorShow=true. Ordinary USB remains non-SuperVOOC with watts=0. User confirmed fast-charge color acceptance on 2026-09-14. Separate unplug and full-charge transition coverage is not established by that feedback; neither candidate is staged or released. Retained APK signer metadata does not mean a modified APK has a valid OEM signature: this system-partition candidate is not an ordinary app update.
 
 ## 官方闪充展示策略
 
