@@ -1,0 +1,71 @@
+name: Stage ReSukiSU release assets
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful ReSukiSU build run ID
+        required: true
+      release_tag:
+        description: Existing draft release tag targeting that build commit
+        required: true
+permissions:
+  actions: read
+  contents: write
+jobs:
+  upload:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BUILD_RUN: ${{ inputs.run_id }}
+      RELEASE_TAG: ${{ inputs.release_tag }}
+    steps:
+      - name: Verify successful source build and draft target
+        run: |
+          python3 - <<'PY'
+          import json,os,subprocess
+          def api(path): return json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GH_REPO']+'/'+path]))
+          run=api('actions/runs/'+str(int(os.environ['BUILD_RUN'])))
+          assert run['name']=='ReSukiSU for OnePlus 8T' and run['head_branch']=='main'
+          assert run['conclusion']=='success' and run['status']=='completed'
+          assert run['head_repository']['full_name']==os.environ['GH_REPO']
+          releases=api('releases?per_page=100')
+          release=next(r for r in releases if r['tag_name']==os.environ['RELEASE_TAG'])
+          assert release['draft'] and release['target_commitish']==run['head_sha']
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+          path: artifacts
+      - name: Verify and upload three finished assets to draft
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,subprocess,zipfile
+          root=Path('artifacts')
+          def one(pattern):
+              files=list(root.rglob(pattern)); assert len(files)==1,files
+              return files[0]
+          def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          boot=one('*_kebab_boot.img'); twrp=one('*_kebab_TWRP.zip'); apk=one('*_arm64-v8a-release.apk')
+          manifest=json.loads((twrp.parent/'manifest.json').read_text())
+          lock=json.loads((root/'resolved-resukisu-inputs/sources.json').read_text())
+          assert lock==manifest['source_locks']==json.loads((root/'kernel/sources.json').read_text())
+          provenance=json.loads((apk.parent/'provenance.json').read_text())
+          assert provenance['source_commit']==lock['resukisu_commit']
+          assert not provenance['recompiled'] and not provenance['resigned']
+          assert sha(apk)==lock['official_manager_sha256']
+          assert sha(boot)==manifest['boot_sha256'] and boot.stat().st_size==lock['boot_partition_bytes']
+          names=manifest['artifact_names']
+          assert [boot.name,twrp.name,apk.name]==[names['boot'],names['twrp'],names['apk']]
+          with zipfile.ZipFile(twrp) as z:
+              assert z.testzip() is None
+              assert hashlib.sha256(z.read('images/boot.img')).hexdigest()==sha(boot)
+          for line in (twrp.parent/'SHA256SUMS.txt').read_text().splitlines():
+              digest,name=line.split('  ',1)
+              assert Path(name).name==name
+              assert sha(boot if name==boot.name else twrp.parent/name)==digest
+          subprocess.run(['gh','release','upload',os.environ['RELEASE_TAG'],str(boot),str(twrp),str(apk),'--clobber'],check=True)
+          PY
