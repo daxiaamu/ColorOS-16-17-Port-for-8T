@@ -67,3 +67,9 @@ OS16 新相机、一碰互联、单应用 999 分身、整套指纹动画、赛�
 ## 20260914 分身候选验收
 
 新建分身因媒体进程附加组未刷新导致外部存储挂载失败。刷新候选已临时加载，用户确认新建后不重启即可打开；与闪充共用后继框架候选，待发布合入。详见 [clone-storage-groups](clone-storage-groups.md)。
+
+## 20260914 OShare tiles and charging color
+
+OShare tile migration repair is user-confirmed and staged, not yet in a new release ZIP. See [qs-component-migration](qs-component-migration.md).
+
+The charging-color candidates now account for the donor product launch API35 versus 8T board API30 and the independent query-4 watts field. Both are temporarily loaded; runtime special-color eligibility is true and ordinary USB regression passed. Real 65W color remains pending; not staged or released. See [wallpaper-charge-haptics](wallpaper-charge-haptics.md).

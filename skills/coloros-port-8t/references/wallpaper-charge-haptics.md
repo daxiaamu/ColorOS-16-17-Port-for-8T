@@ -6,7 +6,11 @@
 
 山之道及已下载主题进入预览、尚未应用时提示壁纸丢失。相对 URI 回退到绝对路径后仍报 ENOENT：`/my_product/decouping_wallpaper/common/wallpaper_group/00_ColorOS15/ColorOS1506.webp`。实际缺失整个 wallpaper_group，不是主题 APK 权限或下载状态。
 
-从同供体 PMD110_16.0.10.501 原始 my_product 恢复完整目录：26 文件、121578751 字节，包括静态图、视频、mask 和配置；临时挂载后用户确认修好。新供体按配置引用检查资源闭包，不能只补第一个报错文件。文件0644、目录0755、root:root、正确 SELinux 标签；保留其它 common 内容，重算 EROFS 和动态分区预算。不要吞掉提示或清空用户主题数据。其它 AI 抠图错误不能因此宣称解决。
+从同供体 PMD110 decoded protocol cases passed. On-device inspection found ro.product.first_api_level=35 while ro.board.first_api_level, ro.board.api_level and ro.vendor.api_level are 30. StatusBarFeatureOption.isChargeVoocSpecialColorShow checks launch API <35, not the current Android version. A newer phone remaining green is not sufficient evidence that this port is correct.
+
+The local SystemUI candidate reads board first API only for the KB2000 special-color gate, falling back to the original product value if absent. Global properties and other models remain unchanged. LocationBasedBatteryViewModel additionally requires SuperVOOC and CPA watts >=33 for blue, or >=100 for purple. With the special-color gate disabled, native charging green is expected. Recheck resource names and values on donor updates; do not reuse numeric resource IDs blindly.
+
+Both query-4 framework and local SystemUI candidates are now temporarily loaded. Framework restart succeeded; runtime dump reports voocSpecialColorShow=true. Ordinary USB remains non-SuperVOOC with watts=0. Real non-full 65W color, unplug and full-charge regression remain pending; neither candidate is staged or released. Retained APK signer metadata does not mean a modified APK has a valid OEM signature: this system-partition candidate is not an ordinary app update.
 
 ## 官方闪充展示策略
 

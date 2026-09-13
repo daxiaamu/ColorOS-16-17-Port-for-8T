@@ -32,6 +32,8 @@ description: 为一加 8T 移植和调试 ColorOS 提供供体评估与新 ROM �
 | 分身新建后无法启动、重启才生效 | [clone-storage-groups](references/clone-storage-groups.md)：首次挂载错误、媒体进程附加组与生命周期刷新 |
 | 需要追溯实现来源 | [sources](references/sources.md)：查询原始项目并锁定版本 |
 
+For OShare tile add/remove regressions, read [qs-component-migration](references/qs-component-migration.md): retire obsolete overlay mappings before changing the editor.
+
 ## 选择修复的顺序
 
 优先纠正不适用的能力声明，随后复用原有兼容分支，再修复已证实的接口、线程或文件问题。确需兼容层时，限定进程与硬件范围，说明错误返回、状态归属和回退方式。不要用吞掉错误、永久强制 GPU 合成、缩短动画或修改温控来代替根因定位。
