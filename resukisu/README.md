@@ -33,3 +33,7 @@ The five-file networking backport in `patches/0001-net-fix-dst-negative-advice.p
 ## Kernel version suffix
 
 The kernel release is `4.19.157-perf-daxiaamu+`, set through the build argument `LOCALVERSION=-daxiaamu+` alongside the stock `CONFIG_LOCALVERSION="-perf"`. The build checks the generated release and its presence in Image, and includes `kernel-release.txt` in the kernel artifact. OEM certificate and vendor symbol CRC checks remain required; this suffix change has not been device-tested.
+
+## S3908 single-tap wake repair
+
+On kebab the boot/ABI repair was device-tested: Android booted, 34 modules loaded and ReSukiSU root worked, but panoramic AOD single-tap wake failed. The S3908 driver enabled the single-tap firmware mask but lacked `STAP_DETECT` decoding. `module-patches/0001-s3908-restore-single-tap-gesture.patch` restores event `0x10` to `SingleTap` and tap coordinates from `extra_gesture_info`, following [official OPPO SM8250 source f141bd5](https://github.com/oppo-source/android_kernel_modules_and_devicetree_oppo_sm8250/commit/f141bd5518945b3c887f1e48203368fff6be3af2). SystemUI and APK are unchanged. This additional touch repair requires a new build and device validation; the previous boot-success result does not validate it.

@@ -35,6 +35,10 @@ for base in [K,W/'modules']:
 for patch in sorted((R/'patches').glob('*.patch')):
  run('git','-C',str(K),'apply','--check',str(patch))
  run('git','-C',str(K),'apply',str(patch))
+# Restore S3908 single-tap decoding from official same-platform source.
+for patch in sorted((R/'module-patches').glob('*.patch')):
+ run('git','-C',str(W/'modules'),'apply','--check',str(patch))
+ run('git','-C',str(W/'modules'),'apply',str(patch))
 # GNU empty aggregate initialization is equivalent to zero initialization, and
 # avoids Clang 10's nested-aggregate missing-braces diagnostic in vendor code.
 fixes=[

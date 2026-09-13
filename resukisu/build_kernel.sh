@@ -2,6 +2,7 @@
 set -euo pipefail
 ROOT=$(pwd)
 python3 resukisu/prepare.py
+python3 resukisu/test_s3908_gesture.py build/modules
 python3 resukisu/verify_manager_compatibility.py build/src/kernel/msm/KernelSU/kernel
 NDK="$ANDROID_HOME/ndk/21.4.7075529/toolchains/llvm/prebuilt/linux-x86_64/bin"
 export PATH="$ROOT/build/bin:$NDK:$PATH"
