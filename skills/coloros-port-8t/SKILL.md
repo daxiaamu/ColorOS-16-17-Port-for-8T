@@ -28,6 +28,7 @@ description: 为一加 8T 移植和调试 ColorOS 提供供体评估与新 ROM �
 | 已适配完成，提供新供体 ZIP | [donor-update](references/donor-update.md)：基线索引、差异计划、补丁复用/退役、受影响回归 |
 | data 自动预装、split 缺失、TWRP 不识别 data | [native-preload](references/native-preload.md)：真实挂载、PMS 原生扫描与安装时序 |
 | 晕动舒缓无点阵、自动乘车不生效 | [motion-relief](references/motion-relief.md)：实际传感器、官方 CMC 协议与设置页状态重置 |
+| 主题预览壁纸丢失、闪充瓦数、键盘无振动 | [wallpaper-charge-haptics](references/wallpaper-charge-haptics.md)：资源闭包、原厂协议展示和 RAM 触感兼容；三项待发布合入 |
 | 需要追溯实现来源 | [sources](references/sources.md)：查询原始项目并锁定版本 |
 
 ## 选择修复的顺序
