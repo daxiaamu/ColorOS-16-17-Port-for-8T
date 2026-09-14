@@ -18,6 +18,8 @@
 
 ## 已整理内容
 
+- [公开补丁工具与原创兼容片段](skills/coloros-port-8t/references/source-recipes.md)
+- [50 分身与原厂卸载生命周期](skills/coloros-port-8t/references/clone-lifecycle.md)
 - [供体新 ROM 快速适配](skills/coloros-port-8t/references/donor-update.md)
 - [userdata 原生预装与 TWRP data 修复](skills/coloros-port-8t/references/native-preload.md)
 - [小布扫一扫 Camera2 与版本属性兼容](skills/coloros-port-8t/references/scanner-camera2.md)
@@ -30,7 +32,7 @@
 - [TWRP 打包、回归、发布与回退](skills/coloros-port-8t/references/release.md)
 - [参考来源及用途](skills/coloros-port-8t/references/sources.md)
 
-截至 2026-09-11，主线为 Reno15c PMD110 16.0.10.501 → 8T KB2000。r15 候选镜像已在官方 OS13 底层固件、DDR4、B 槽完成手动格式化后的首启、自动预装及正常重启；最新 20260911 完整包已合入晕动舒缓、扫一扫 Camera2 兼容及 super 容量下限检查，完成离线校验与 NAS 交付；扫一扫和版本号已完成候选镜像重启验证。最终 ZIP 整包刷入、覆盖升级及扩容 super 实机仍待单独验收。ColorOS 17 与 DDR5 未据此宣称已验证。
+截至 2026-09-15，主线为 Reno15c PMD110 16.0.10.501 → 8T KB2000，仅接受已支持的官方 ColorOS14/氧OS14 底层固件。20260915 完整包已合入 QQ 相机启动、50 分身配额、旁路供电与高级重启等后继改动，完成离线校验和交付；最终 ZIP 的干净安装和覆盖升级未重新实测。ColorOS17、DDR5 与未复现问题不据此宣称已验证。最新证据优先见 [当前状态](skills/coloros-port-8t/references/current-status.md)。
 
 ## 供体更新时使用
 

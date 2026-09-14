@@ -31,6 +31,7 @@ description: 为一加 8T 移植和调试 ColorOS 提供供体评估与新 ROM �
 | 晕动舒缓无点阵、自动乘车不生效 | [motion-relief](references/motion-relief.md)：实际传感器、官方 CMC 协议与设置页状态重置 |
 | 主题预览壁纸丢失、闪充瓦数、键盘无振动 | [wallpaper-charge-haptics](references/wallpaper-charge-haptics.md)：资源闭包、原厂协议展示和 RAM 触感兼容；状态以当前发布快照为准 |
 | 分身新建后无法启动、重启才生效 | [clone-storage-groups](references/clone-storage-groups.md)：存储附加组、合成桌面入口及重启/重建回归 |
+| 50 分身配额、卸载主包后残留 | [clone-lifecycle](references/clone-lifecycle.md)：原生用户属性、系统 UID 配额与未复现边界 |
 | 需要追溯实现来源 | [sources](references/sources.md)：查询原始项目并锁定版本 |
 
 For OShare tile add/remove regressions, read [qs-component-migration](references/qs-component-migration.md): retire obsolete overlay mappings before changing the editor.
@@ -47,7 +48,9 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 
 用户只提供新 ROM 时，先读私有工程已有的基线索引，默认沿用最近验收的同供体分支和 8T 硬件组合；在本项目工作区索引为 reports/donor-update-baseline.json。路径是项目约定，不是公开技能自带文件。区分已验收镜像与最新交付 ZIP。按补丁账本处理，变化项重新定位，撤回项不复活；缺旧输入或配方时先列出缺项并完成差异分析。
 
-## 本地校验工具
+## 公开实现与本地校验工具
+
+新增或重放字节码修复前读 [source-recipes](references/source-recipes.md)。[patch_smali.py](scripts/patch_smali.py) 按输入哈希、方法签名和匹配次数生成变化文件；它不组装、不刷机，也不证明功能正确。
 
 - [donor_delta.py](scripts/donor_delta.py)：只读生成供体清单与补丁影响计划，输入见 [新供体更新](references/donor-update.md)。不应用补丁。
 

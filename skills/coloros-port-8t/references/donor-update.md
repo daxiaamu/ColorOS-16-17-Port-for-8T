@@ -79,3 +79,9 @@ python scripts/donor_delta.py plan old.json new.json --patches patches.json --ou
 }
 ```
 只读工具检查 inputs、依赖图和状态；recipe、输出哈希和语义后置条件由本地补丁构建器负责。新增补丁可以用 state=experimental 登记，不能伪填 verified 以获得复用资格。
+
+## 20260915 接续基线
+
+读取 [当前状态](current-status.md) 及 [公开代码约定](source-recipes.md)。沿用 OS14 互传和 8T 硬件底层，不把新供体 OS16 互传或供体固件自动替入。50 分身上限、Job 配额和卸载语义按 [clone-lifecycle](clone-lifecycle.md) 成组审核；新供体已解决配额时退役旧公式。QQ HAL guard 在新服务已声明/调用逻辑改变时重新判定。旁路库须保持请求解析、停止归属、无效采样及上限共存，不只复制开关。
+
+每次新包交接至少输出四项：输入/依赖差异；每个补丁的复用、重定位、退役或阻塞理由；已验/未验功能矩阵；实际进入最终镜像和ZIP的哈希。公开工具有意不携带工作站路径或历史编译目录，历史一次性脚本不能当可重建配方直接重跑。
