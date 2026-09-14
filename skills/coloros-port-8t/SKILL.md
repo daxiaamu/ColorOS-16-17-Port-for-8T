@@ -21,6 +21,7 @@ description: 为一加 8T 移植和调试 ColorOS 提供供体评估与新 ROM �
 | 供体选择、第一屏/动画循环、APEX 挂载 | [boot-and-build](references/boot-and-build.md)：定位重启阶段，核对旧内核 EROFS 支持 |
 | 实体黑屏、AOD、DC、指纹、振动、三段键、音频 | [hardware](references/hardware.md)：能力声明 → 原生分支 → HAL → 驱动 → 实体结果 |
 | 小布扫一扫黑屏、CameraUnit 拒绝、版本号导致网络崩溃 | [scanner-camera2](references/scanner-camera2.md)：已有 Camera2 分支、协议属性与重启验证 |
+| QQ/第三方扫一扫启动约十秒 | [thirdparty-camera-startup](references/thirdparty-camera-startup.md)：权限基线、缺失 HAL 的同步等待与声明判断 |
 | 充电上限或旁路开关无效 | [charging](references/charging.md)：实际电流、停止归属、共存与回退 |
 | 冷启动/开关应用动画掉帧、投屏卡顿 | [performance](references/performance.md)：真实冷启动和同条件帧时序 |
 | 功能隐藏、空列表、MOD 设置、互传、相机档位 | [apps-and-settings](references/apps-and-settings.md)：依赖、调用链和真实能力 |
@@ -28,8 +29,8 @@ description: 为一加 8T 移植和调试 ColorOS 提供供体评估与新 ROM �
 | 已适配完成，提供新供体 ZIP | [donor-update](references/donor-update.md)：基线索引、差异计划、补丁复用/退役、受影响回归 |
 | data 自动预装、split 缺失、TWRP 不识别 data | [native-preload](references/native-preload.md)：真实挂载、PMS 原生扫描与安装时序 |
 | 晕动舒缓无点阵、自动乘车不生效 | [motion-relief](references/motion-relief.md)：实际传感器、官方 CMC 协议与设置页状态重置 |
-| 主题预览壁纸丢失、闪充瓦数、键盘无振动 | [wallpaper-charge-haptics](references/wallpaper-charge-haptics.md)：资源闭包、原厂协议展示和 RAM 触感兼容；三项待发布合入 |
-| 分身新建后无法启动、重启才生效 | [clone-storage-groups](references/clone-storage-groups.md)：首次挂载错误、媒体进程附加组与生命周期刷新 |
+| 主题预览壁纸丢失、闪充瓦数、键盘无振动 | [wallpaper-charge-haptics](references/wallpaper-charge-haptics.md)：资源闭包、原厂协议展示和 RAM 触感兼容；状态以当前发布快照为准 |
+| 分身新建后无法启动、重启才生效 | [clone-storage-groups](references/clone-storage-groups.md)：存储附加组、合成桌面入口及重启/重建回归 |
 | 需要追溯实现来源 | [sources](references/sources.md)：查询原始项目并锁定版本 |
 
 For OShare tile add/remove regressions, read [qs-component-migration](references/qs-component-migration.md): retire obsolete overlay mappings before changing the editor.
