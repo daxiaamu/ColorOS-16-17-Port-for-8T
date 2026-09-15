@@ -23,6 +23,9 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools build-tools;36.0.0
+          log-accepted-android-sdk-licenses: false
       - name: Test official build selection guards
         run: python3 resukisu/test_official_manager.py
       - id: names
@@ -55,6 +58,9 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools build-tools;36.0.0
+          log-accepted-android-sdk-licenses: false
       - name: Install kernel toolchain
         run: |
           sudo apt-get update -qq
