@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Resolve one official main-branch build and preserve its verified APK/source pair."""
 from pathlib import Path
+from datetime import datetime, timezone
+from urllib.parse import quote
 import argparse, hashlib, json, os, re, shutil, subprocess, zipfile
 from artifact_names import artifact_names
 
@@ -17,9 +19,11 @@ def eligible(run):
             and run.get('head_repository', {}).get('full_name') == REPO)
 
 def latest_run():
-    # GitHub returns runs newest first. Scan pages, never select a PR/fork build.
+    # Bound one workflow query to this resolution instant. This also avoids a
+    # stale cached all-workflows URL silently selecting an old APK/source pair.
+    cutoff = quote("<=" + datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), safe="")
     for page in range(1, 11):
-        runs = api(f'actions/runs?branch=main&status=success&per_page=100&page={page}')['workflow_runs']
+        runs = api(f'actions/workflows/build-manager.yml/runs?branch=main&status=success&per_page=100&page={page}&created={cutoff}')['workflow_runs']
         candidates = [r for r in runs if eligible(r)]
         if candidates:
             return max(candidates, key=lambda r: (r['created_at'], r['id']))
@@ -94,6 +98,8 @@ def main():
     verify_signer(verification, trust['official_certificate_sha256'])
     badging = subprocess.check_output([sdk_tool('aapt'),'dump','badging',str(apk)], text=True)
     version, code = APK_NAME.fullmatch(apk.name).groups()
+    if args.latest:
+        assert int(code) >= sources.get('minimum_manager_version_code', 35137), 'Official manager would downgrade below the previously delivered build; review required'
     assert re.search(r"versionCode='"+re.escape(code)+r"'", badging), 'APK versionCode differs from filename'
     apk_version = re.search(r"versionName='([^']+)'", badging).group(1)
     assert apk_version.lstrip('v') == version.lstrip('v'), 'APK versionName differs from filename'

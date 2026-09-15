@@ -19,6 +19,13 @@ class OfficialBuildTests(unittest.TestCase):
         pr=dict(self.run,id=43,event='pull_request')
         with patch('fetch_official_manager.api',return_value={'workflow_runs':[pr,older,self.run]}):
             self.assertEqual(latest_run()['id'],42)
+    def test_query_targets_manager_with_resolution_time(self):
+        with patch('fetch_official_manager.api',return_value={'workflow_runs':[self.run]}) as query:
+            latest_run()
+            path=query.call_args[0][0]
+            self.assertTrue(path.startswith('actions/workflows/build-manager.yml/runs?'))
+            self.assertIn('created=%3C%3D',path)
+
     def test_expired_latest_fails_instead_of_falling_back(self):
         with patch('fetch_official_manager.api',return_value={'artifacts':[{'name':'Manager-release','expired':True}]}):
             with self.assertRaises(AssertionError):release_artifact(self.run)
