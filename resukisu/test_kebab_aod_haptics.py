@@ -43,8 +43,13 @@ int main(void) {
  int ids[]={815,81538,1815,9595,619,1040,832,999};
  int fs[]={1400,1470,1471,1525,1526,1670,1671,1680,1681,1720,1721,1725,1726,1751,2280,2281,2320,2321,2350,2351};
  unsigned cases=0;
+#ifdef CONFIG_OPLUS_HAPTIC_OOS
+ const int count1815=436;
+#else
+ const int count1815=300;
+#endif
  for(unsigned d=0;d<8;d++) for(unsigned f=0;f<20;f++)
- for(int i=0;i<(ids[d]==1815 ? 436 : 300);i++) for(fail=0;fail<2;fail++) {
+ for(int i=0;i<(ids[d]==1815 ? count1815 : 300);i++) for(fail=0;fail<2;fail++) {
   struct aw8697 a={ids[d],fs[f],i,1,NULL},b=a; char previous[64],expected[64];
   const struct firmware *ra=old_request(&a); strcpy(previous,requested);
   const struct firmware *rb=new_request(&b);
