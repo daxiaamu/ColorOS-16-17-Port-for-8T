@@ -1,0 +1,15 @@
+--- a/vendor/oplus/kernel/vibrator/aw8697_haptic/aw8697.c
++++ b/vendor/oplus/kernel/vibrator/aw8697_haptic/aw8697.c
+@@ -5387,9 +5387,9 @@
+     {"aw8697_strength_level_bar_edge_RTP_107.bin"},
+     {"aw8697_reserved_108.bin"},
+     {"aw8697_reserved_109.bin"},
+-    {"aw8697_reserved_110.bin"},
+-    {"aw8697_reserved_111.bin"},
+-    {"aw8697_reserved_112.bin"},
++    {"aw8697_fingerprint_effect1_RTP_110.bin"},
++    {"aw8697_fingerprint_effect2_RTP_111.bin"},
++    {"aw8697_fingerprint_effect3_RTP_112.bin"},
+     {"aw8697_reserved_113.bin"},
+     {"aw8697_reserved_114.bin"},
+     {"aw8697_reserved_115.bin"},

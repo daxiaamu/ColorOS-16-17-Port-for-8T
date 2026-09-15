@@ -35,7 +35,7 @@ for base in [K,W/'modules']:
 for patch in sorted((R/'patches').glob('*.patch')):
  run('git','-C',str(K),'apply','--check',str(patch))
  run('git','-C',str(K),'apply',str(patch))
-# Restore S3908 single-tap decoding from official same-platform source.
+# Apply vendor driver compatibility patches without replacing whole files.
 for patch in sorted((R/'module-patches').glob('*.patch')):
  run('git','-C',str(W/'modules'),'apply','--check',str(patch))
  run('git','-C',str(W/'modules'),'apply',str(patch))

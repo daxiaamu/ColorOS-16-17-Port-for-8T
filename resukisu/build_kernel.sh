@@ -3,6 +3,7 @@ set -euo pipefail
 ROOT=$(pwd)
 python3 resukisu/prepare.py
 python3 resukisu/test_s3908_gesture.py build/modules
+python3 resukisu/test_kebab_aod_haptics.py build/src/kernel/msm build/modules --report build/kebab-regression.json
 python3 resukisu/verify_manager_compatibility.py build/src/kernel/msm/KernelSU/kernel
 NDK="$ANDROID_HOME/ndk/21.4.7075529/toolchains/llvm/prebuilt/linux-x86_64/bin"
 export PATH="$ROOT/build/bin:$NDK:$PATH"
@@ -11,7 +12,7 @@ export CCACHE_COMPILERCHECK=content
 trap 'ccache --show-stats' EXIT
 ccache --max-size=2G
 export KBUILD_BUILD_USER=daxiaamu KBUILD_BUILD_HOST=github-actions
-export KBUILD_BUILD_TIMESTAMP='Sat Sep 12 00:00:00 UTC 2026'
+export KBUILD_BUILD_TIMESTAMP="$(git show -s --format=%cD HEAD)"
 cd build/src/kernel/msm
 ARGS=(O="$ROOT/build/out" ARCH=arm64 BRAND_SHOW_FLAG=oneplus REAL_CC="ccache clang" LLVM=1 LLVM_IAS=0 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-androideabi- CLANG_TRIPLE=aarch64-linux-gnu- LOCALVERSION=-daxiaamu+ LD=aarch64-linux-gnu-ld OBJCOPY=aarch64-linux-gnu-objcopy OPLUS_FEATURE_WIFI_ROUTERBOOST=yes OPLUS_FEATURE_ADFR_KERNEL=yes OPLUS_FEATURE_PROCESS_RECLAIM=yes OPLUS_FEATURE_MEMLEAK_DETECT=yes OPLUS_FEATURE_UFS_SHOW_LATENCY=yes OPLUS_FEATURE_PADL_STATISTICS=yes OPLUS_FEATURE_UFSPLUS=yes OPLUS_FEATURE_SECURE_ROOTGUARD=no OPLUS_FEATURE_SECURE_MOUNTGUARD=no OPLUS_FEATURE_SECURE_EXECGUARD=no)
 make "${ARGS[@]}" olddefconfig 2>&1 | tee "$ROOT/build/configure.log"
@@ -21,6 +22,8 @@ done
 make -k -j"$(nproc)" "${ARGS[@]}" Image 2>&1 | tee "$ROOT/build/kernel.log"
 cd "$ROOT"
 mkdir -p kernel-output
+python3 resukisu/verify_kebab_compile.py build/out --report build/kebab-compile.json
+cp build/kebab-regression.json build/kebab-compile.json kernel-output/
 cp build/out/arch/arm64/boot/Image kernel-output/Image
 cp build/out/.config kernel-output/kernel.config
 cp build/out/Module.symvers kernel-output/

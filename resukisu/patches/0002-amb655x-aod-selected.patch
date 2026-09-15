@@ -1,0 +1,60 @@
+--- a/techpack/display/msm/dsi/dsi_panel.c
++++ b/techpack/display/msm/dsi/dsi_panel.c
+@@ -949,6 +949,25 @@
+ }
+ #endif /* OPLUS_BUG_STABILITY */
+ 
++#ifdef OPLUS_BUG_STABILITY
++/* Keep AMB655X lit across direct AOD entry/wake; retain the vendor sequence
++ * after its leading DISPLAY_OFF command, including all remaining waits.
++ */
++static bool dsi_panel_amb655x_skip_display_off(struct dsi_panel *panel,
++		enum dsi_cmd_set_type type, struct dsi_cmd_desc *cmds, u32 count)
++{
++	return ((type == DSI_CMD_SET_LP1 &&
++	      panel->power_mode == SDE_MODE_DPMS_ON) ||
++	     (type == DSI_CMD_SET_NOLP &&
++	      (panel->power_mode == SDE_MODE_DPMS_LP1 ||
++	       panel->power_mode == SDE_MODE_DPMS_LP2))) &&
++	    !strcmp(panel->oplus_priv.vendor_name, "AMB655X") &&
++	    count > 1 && cmds && cmds->msg.type == MIPI_DSI_DCS_SHORT_WRITE &&
++	    cmds->msg.tx_len == 1 && cmds->msg.tx_buf &&
++	    ((const u8 *)cmds->msg.tx_buf)[0] == MIPI_DCS_SET_DISPLAY_OFF;
++}
++#endif
++
+ #ifndef OPLUS_BUG_STABILITY
+ static int dsi_panel_tx_cmd_set(struct dsi_panel *panel,
+ 				enum dsi_cmd_set_type type)
+@@ -1018,6 +1037,14 @@
+ 			DSI_ERR("iris_pt_send_panel_cmd failed\n");
+ 		return rc;
+     }
++#endif
++
++#ifdef OPLUS_BUG_STABILITY
++	/* Adjust only the local cursor; preserve the shared command table. */
++	if (dsi_panel_amb655x_skip_display_off(panel, type, cmds, count)) {
++		cmds++;
++		count--;
++	}
+ #endif
+ 
+ 	for (i = 0; i < count; i++) {
+@@ -5353,6 +5380,16 @@
+ 	oplus_set_aod_gamma_data_status(panel);
+ 	oplus_update_aod_light_mode_unlock(panel);
+ 	panel->need_power_on_backlight = true;
++	/* DISPLAY_OFF was skipped: no deferred DISPLAY_ON is needed. */
++	if (!rc &&
++	    panel->cur_mode->priv_info->cmd_sets[DSI_CMD_POST_ON_BACKLIGHT].count) {
++		struct dsi_panel_cmd_set *lp1 =
++			&panel->cur_mode->priv_info->cmd_sets[DSI_CMD_SET_LP1];
++
++		if (dsi_panel_amb655x_skip_display_off(panel, DSI_CMD_SET_LP1,
++				lp1->cmds, lp1->count))
++			panel->need_power_on_backlight = false;
++	}
+ 	set_oplus_display_power_status(OPLUS_DISPLAY_POWER_DOZE);
+ #endif
+ exit:
