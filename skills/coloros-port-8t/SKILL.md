@@ -20,6 +20,7 @@ description: 为一加 8T 移植和调试 ColorOS 提供供体评估与新 ROM �
 |---|---|
 | 供体选择、第一屏/动画循环、APEX 挂载 | [boot-and-build](references/boot-and-build.md)：定位重启阶段，核对旧内核 EROFS 支持 |
 | 实体黑屏、AOD、DC、指纹、振动、三段键、音频 | [hardware](references/hardware.md)：能力声明 → 原生分支 → HAL → 驱动 → 实体结果 |
+| 全景息屏入场黑闪、两阶亮度、效果切换 | [aod-transition](references/aod-transition.md)：AMB655X累计方案、持久选择与已停止实验 |
 | 小布扫一扫黑屏、CameraUnit 拒绝、版本号导致网络崩溃 | [scanner-camera2](references/scanner-camera2.md)：已有 Camera2 分支、协议属性与重启验证 |
 | QQ/第三方扫一扫启动约十秒 | [thirdparty-camera-startup](references/thirdparty-camera-startup.md)：权限基线、缺失 HAL 的同步等待与声明判断 |
 | 充电上限或旁路开关无效 | [charging](references/charging.md)：实际电流、停止归属、共存与回退 |
