@@ -27,7 +27,7 @@ jobs:
           import json,os,subprocess
           def api(path): return json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GH_REPO']+'/'+path]))
           run=api('actions/runs/'+str(int(os.environ['BUILD_RUN'])))
-          assert run['name']=='ReSukiSU for OnePlus 8T' and run['head_branch']=='main'
+          assert run['name']=='ReSukiSU for OnePlus 8T' and run['head_branch']=='ColorOS-16'
           assert run['conclusion']=='success' and run['status']=='completed'
           assert run['head_repository']['full_name']==os.environ['GH_REPO']
           releases=api('releases?per_page=100')
