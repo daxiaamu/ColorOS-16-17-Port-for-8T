@@ -1,61 +1,36 @@
-# ColorOS 16 / 17 Port for OnePlus 8T
+# ReSukiSU for ColorOS 16 · OnePlus 8T (kebab)
 
-面向一加 8T 移植、调试与回归的 AI agent skill，由 **大侠阿木** 的实际移植记录整理。它提供决策方法、已验证案例、失败经验和离线校验工具，供后续移植工作复用。
+此分支公开大侠阿木 ColorOS 16 移植项目的一加 8T ReSukiSU 适配源码、补丁、GitHub Actions 和排查记录。目标分支为 `ReSukiSU-ColorOS16`；不据此承诺兼容 9R、其他面板或任意 ROM。
 
-**当前证据覆盖 ColorOS 16；ColorOS 17 尚未验证。** 仓库名称中的 17 表示后续适配方向，不是兼容承诺。这不是 ROM 下载仓库，也不是从原厂包一键生成全部修复的构建系统。
+## 从这里开始
 
-## 实机截图
+- [构建、安装与源码锁说明](resukisu/README.md)
+- [适配与故障排查记录](resukisu/docs/adaptation-notes.md)
+- [已验证内容、构建版本与限制](resukisu/docs/verification.md)
+- [可复核的公开校验记录](resukisu/docs/verification-20260920.json)
+- [内核补丁](resukisu/patches/) / [厂商驱动补丁](resukisu/module-patches/)
+- [精确 boot 兼容名单](resukisu/compatible_boots.json)
 
-[查看全部 46 张 ColorOS 16 一加 8T 截图](screenshots/README.md)。
+## 自动构建
 
-## 使用
+在 Actions 中选择 **ReSukiSU for OnePlus 8T**，Run workflow 时选择 `ReSukiSU-ColorOS16`。该分支的构建脚本或工作流更新也会触发编译。
 
-将 `skills/coloros-port-8t` 整个目录复制到 Codex 的用户技能目录（通常为 `~/.codex/skills/`），在任务中调用：
+产物为带 ReSukiSU 版本、构建号及日期的 TWRP ZIP、包内同一份成品 boot.img、配套官方 Actions 管理器 APK。内核与 APK 使用同一次解析锁定的官方源码提交；不重新编译或重签名 APK。完整源码从锁定的官方仓库获取，仓库保存集成脚本和补丁，不重复托管整套上游内核。
 
-> 使用 $coloros-port-8t 分析这份供体 ROM 与我的 8T 硬件基线，先建立版本清单，再定位启动或硬件兼容问题。
+内核版本后缀为 `-daxiaamu+`。编译检查原厂模块信任证书、976 项导入符号 CRC、显示/震动实际编译宏、驱动逻辑回归及 boot 非内核组件一致性。安装器仅写当前槽位并备份、读回校验；只接受核验过的完整 boot 哈希，不跳过校验。
 
-也可直接把 [SKILL.md](skills/coloros-port-8t/SKILL.md) 交给支持 Markdown 技能的其他 agent，工具调用由所在环境实现。Skill 不继承作者对设备刷写、清数据、ROOT 或备份的授权。
+发布工具 `Stage ReSukiSU release assets` 同样选择本分支运行：输入本分支成功构建的 run ID，以及目标为该构建提交的现有草稿 Release。它验证并上传产物到草稿，不代表完成实机验收。
 
-## 已整理内容
+## 当前范围
 
-- [公开补丁工具与原创兼容片段](skills/coloros-port-8t/references/source-recipes.md)
-- [50 分身与原厂卸载生命周期](skills/coloros-port-8t/references/clone-lifecycle.md)
-- [供体新 ROM 快速适配](skills/coloros-port-8t/references/donor-update.md)
-- [userdata 原生预装与 TWRP data 修复](skills/coloros-port-8t/references/native-preload.md)
-- [小布扫一扫 Camera2 与版本属性兼容](skills/coloros-port-8t/references/scanner-camera2.md)
-- [当前状态与验证边界](skills/coloros-port-8t/references/current-status.md)
-- [供体选择、首次启动与 APEX/EROFS](skills/coloros-port-8t/references/boot-and-build.md)
-- [显示、指纹、振动、三段键与音频](skills/coloros-port-8t/references/hardware.md)
-- [充电上限、旁路供电与状态归属](skills/coloros-port-8t/references/charging.md)
-- [冷启动、动画、UI 线程和 CPU/GPU](skills/coloros-port-8t/references/performance.md)
-- [原生设置、应用依赖、互传与相机](skills/coloros-port-8t/references/apps-and-settings.md)
-- [TWRP 打包、回归、发布与回退](skills/coloros-port-8t/references/release.md)
-- [参考来源及用途](skills/coloros-port-8t/references/sources.md)
+包含原厂模块 ABI/证书适配、S3908 单击解码、20260916 选定 AMB655X AOD 补丁、1815 RTP 110–112 文件名兼容及 20260920 ROM boot 校验修复。AOD 视觉效果依赖配套 ROM 的 SystemUI 和低档初始化；ROM 已验证的 RAM 触感方案不受内核 RTP 映射修改影响。
 
-截至 2026-09-15，主线为 Reno15c PMD110 16.0.10.501 → 8T KB2000，仅接受已支持的官方 ColorOS14/氧OS14 底层固件。20260915 完整包已合入 QQ 相机启动、50 分身配额、旁路供电与高级重启等后继改动，完成离线校验和交付；最终 ZIP 的干净安装和覆盖升级未重新实测。ColorOS17、DDR5 与未复现问题不据此宣称已验证。最新证据优先见 [当前状态](skills/coloros-port-8t/references/current-status.md)。
+20260916 的 rc2/35153 构建已通过编译和离线校验，20260920 为安装器修订。新组合未完成实机验收，不能把参考内核或旧版的测试结果当成本版已通过。详见验证记录。
 
-## 供体更新时使用
+通用 ROM 移植资料见同仓库 [ColorOS-16 分支](https://github.com/daxiaamu/ColorOS-16-17-Port-for-8T/tree/ColorOS-16)。本分支沿用其公开历史与资料。
 
-> 使用 $coloros-port-8t，基于项目最近验收的移植基线适配这个新供体 ROM。先读取本地基线索引，比较旧/新原始输入，生成补丁复用与重新定位清单；保留 8T 硬件底层、增强功能和无 ROOT 打包策略，再完成受影响回归与新包交付。
+## 许可与公开范围
 
-[更新流程](skills/coloros-port-8t/references/donor-update.md)规定每次验收后保存基线、补丁配方、依赖、工具链及测试证据。只读差异工具用于减少重复逆向，不代替构建和实机验证。
+原创构建工具和说明适用仓库 [MIT License](LICENSE)，文件另有声明的除外。`prepare_hooks.py` 标注 GPL-3.0-only；Linux/OnePlus/ReSukiSU 及其派生代码继续适用各自上游许可，不能将根目录 MIT 视为第三方内核的重新许可。上游地址、固定提交及补丁归属见构建说明与 sources.json。
 
-## 离线辅助工具
-
-```text
-python skills/coloros-port-8t/scripts/verify_image_manifest.py manifest.json --root /path/to/images
-python skills/coloros-port-8t/scripts/audit_artifacts.py /path/to/extracted/tree
-python -m unittest discover -s tests -v
-```
-
-这些工具只读取输入文件并按需写出报告，不连接手机、不刷机。镜像清单工具只验证动态分区输入的完整性和容量；不能替代设备、槽位、快照和刷后读回验证。
-
-## 公开范围与许可
-
-Skill 与截图部分发布重新整理的说明、原创辅助脚本及作者提供的实机展示截图，不包含 OEM APK/ROM、反编译文件、设备校准与身份备份、私钥、原始日志或其他用户媒体。新增的 ReSukiSU 实验构建工作流另见下文；其 boot 构建输入已获作者明确授权在 Release 公开，产物必须区分离线校验与实机验证。
-
-原创内容采用 [MIT License](LICENSE)。第三方项目仅链接并注明用途，其许可独立适用。后续合入第三方代码必须保留对应许可与归属。原始资料中的过时“待修复”与后续结论已按最新证据重新归类，未把研究项目当成已合入功能。
-
-## ReSukiSU Actions
-
-[ReSukiSU 构建说明](resukisu/README.md)：编译配套内核并输出 ReSukiSU TWRP 补丁和其中同一份成品 boot.img（仅打包一次，不生成官方镜像还原包），直接获取固定版本的官方 Actions APK，不重新编译或重签名管理器。工作流核对官方源码提交、APK 整包 SHA256 和签名证书。仅适用于锁定的 ColorOS 16 / 一加 8T boot 基线；未完成实机验证的产物标为测试构建。
+公开内容不包含私钥、设备身份/校准备份、原始设备日志、本地或 NAS 路径。boot 构建输入沿用此前明确授权公开的 Release 文件；未新增上传 ROM、OEM APK 或设备备份。

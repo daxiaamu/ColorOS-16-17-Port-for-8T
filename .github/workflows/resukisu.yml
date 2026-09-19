@@ -2,6 +2,7 @@ name: ReSukiSU for OnePlus 8T
 on:
   workflow_dispatch:
   push:
+    branches: [ReSukiSU-ColorOS16]
     paths:
       - '.github/workflows/resukisu.yml'
       - 'resukisu/**'
