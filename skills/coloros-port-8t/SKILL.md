@@ -44,6 +44,8 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 | 场景 | 参考 |
 |---|---|
 | 小前置包能否略过、还原结果哈希失败 | [增量OTA链与verity范围](references/os17-ota-reconstruction.md) |
+| 新山之道切换后黑壁纸 | [初始布局与COZ2修复](references/os17-mountain-wallpaper.md) |
+| 补丁叠加复查、旧候选回退、合入审计 | [补丁维护](references/os17-patch-maintenance.md) |
 | 第一屏、循环启动、显示硬重置、QSPM等待 | [APEX/旧内核/框架启动](references/os17-boot-framework.md) |
 | Super扩容要求、预装从userdata回迁、完整包验收 | [Super与交付](references/os17-super-release.md) |
 | MOD/关于、无线硬件声明、互传、20分身、主题目录 | [应用与原生设置](references/os17-apps-settings.md) |
