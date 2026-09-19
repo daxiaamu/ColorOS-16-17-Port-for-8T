@@ -43,6 +43,7 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 
 | 场景 | 参考 |
 |---|---|
+| SIM已识别但电话不可用、IMS HAL unavailable | [恢复IMS HIDL兼容](references/os17-ims-hidl.md) |
 | 小前置包能否略过、还原结果哈希失败 | [增量OTA链与verity范围](references/os17-ota-reconstruction.md) |
 | 新山之道切换后黑壁纸 | [初始布局与COZ2修复](references/os17-mountain-wallpaper.md) |
 | 补丁叠加复查、旧候选回退、合入审计 | [补丁维护](references/os17-patch-maintenance.md) |
