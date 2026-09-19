@@ -2,7 +2,13 @@
 
 面向一加 8T 移植、调试与回归的 AI agent skill，由 **大侠阿木** 的实际移植记录整理。它提供决策方法、已验证案例、失败经验和离线校验工具，供后续移植工作复用。
 
-**当前证据覆盖 ColorOS 16；ColorOS 17 尚未验证。** 仓库名称中的 17 表示后续适配方向，不是兼容承诺。这不是 ROM 下载仓库，也不是从原厂包一键生成全部修复的构建系统。
+**本分支为 ColorOS-17：已增加 PLK110 ColorOS 17 → 一加8T的开发移植与实机诊断经验。** 完整开发包曾清装启动，后继分享/性能修复分别实机验证；仍非完整硬件、enforcing或正式发布验收。这不是 ROM 下载仓库，也不是从原厂包一键生成全部修复的构建系统。
+
+## ColorOS 17 专项入口
+
+从 [OS17当前状态](skills/coloros-port-8t/references/os17-current-status.md) 开始；[SKILL.md](skills/coloros-port-8t/SKILL.md) 已加入增量OTA、启动、Super、应用设置、AOD/时钟和性能的路由。使用时检出 `ColorOS-17` 分支并复制整个 `skills/coloros-port-8t` 目录。
+
+> 使用 $coloros-port-8t，先读OS17专项状态，根据已验证的PLK110→8T经验分析这份新供体；重新核对输入哈希、设备与内核，不直接重放旧偏移，也不把候选当成已刷入。
 
 ## 实机截图
 
@@ -32,7 +38,9 @@
 - [TWRP 打包、回归、发布与回退](skills/coloros-port-8t/references/release.md)
 - [参考来源及用途](skills/coloros-port-8t/references/sources.md)
 
-截至 2026-09-15，主线为 Reno15c PMD110 16.0.10.501 → 8T KB2000，仅接受已支持的官方 ColorOS14/氧OS14 底层固件。20260915 完整包已合入 QQ 相机启动、50 分身配额、旁路供电与高级重启等后继改动，完成离线校验和交付；最终 ZIP 的干净安装和覆盖升级未重新实测。ColorOS17、DDR5 与未复现问题不据此宣称已验证。最新证据优先见 [当前状态](skills/coloros-port-8t/references/current-status.md)。
+以下为OS16历史基线；OS17最新边界以上方专项状态为准。
+
+截至 2026-09-15，主线为 Reno15c PMD110 16.0.10.501 → 8T KB2000，仅接受已支持的官方 ColorOS14/氧OS14 底层固件。20260915 完整包已合入 QQ 相机启动、50 分身配额、旁路供电与高级重启等后继改动，完成离线校验和交付；最终 ZIP 的干净安装和覆盖升级未重新实测。OS17不继承这些OS16结论，DDR5与未复现问题不据此宣称已验证。最新证据优先见 [当前状态](skills/coloros-port-8t/references/current-status.md)。
 
 ## 供体更新时使用
 

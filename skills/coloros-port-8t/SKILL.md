@@ -1,11 +1,11 @@
 ---
 name: coloros-port-8t
-description: 为一加 8T 移植和调试 ColorOS 提供供体评估与新 ROM 增量适配、APEX/EROFS 启动兼容、硬件与原生设置适配、冷启动性能定位及 TWRP 交付回归方法。基于 ColorOS 16 实测，迁移到 ColorOS 17 时重新验证接口与构建前提。
+description: 为一加 8T 移植和调试 ColorOS 提供供体评估与新 ROM 增量适配、APEX/EROFS 启动兼容、硬件与原生设置适配、冷启动性能定位及 TWRP 交付回归方法。基于 ColorOS 16 与 PLK110 ColorOS 17 的 8T 实测，按版本重验接口、构建前提与发布边界。
 ---
 
 # ColorOS port for OnePlus 8T
 
-先读 [当前状态](references/current-status.md)，把历史事实与当前用户的目标、固件和授权分开。不要把已成功的某一台 KB2000 实验推广为所有 8T 变种均支持。
+ColorOS 17 任务先读 [OS17状态与验收边界](references/os17-current-status.md)；ColorOS 16 任务读 [当前状态](references/current-status.md)，把历史事实与当前用户的目标、固件和授权分开。不要把已成功的某一台 KB2000 实验推广为所有 8T 变种均支持。
 
 ## 建立本次任务的事实
 
@@ -36,6 +36,19 @@ description: 为一加 8T 移植和调试 ColorOS 提供供体评估与新 ROM �
 | 需要追溯实现来源 | [sources](references/sources.md)：查询原始项目并锁定版本 |
 
 For OShare tile add/remove regressions, read [qs-component-migration](references/qs-component-migration.md): retire obsolete overlay mappings before changing the editor.
+
+## ColorOS 17 专项经验
+
+此分支为PLK110供体在8T上的开发验证，不代表所有硬件或正式发布验收。保留上面的通用工作流，遇到下列问题再读取对应资料：
+
+| 场景 | 参考 |
+|---|---|
+| 小前置包能否略过、还原结果哈希失败 | [增量OTA链与verity范围](references/os17-ota-reconstruction.md) |
+| 第一屏、循环启动、显示硬重置、QSPM等待 | [APEX/旧内核/框架启动](references/os17-boot-framework.md) |
+| Super扩容要求、预装从userdata回迁、完整包验收 | [Super与交付](references/os17-super-release.md) |
+| MOD/关于、无线硬件声明、互传、20分身、主题目录 | [应用与原生设置](references/os17-apps-settings.md) |
+| 全景息屏黑屏、无缝时钟成功后失效 | [AOD与OneShot条件](references/os17-aod-clock.md) |
+| 语音崩溃循环、traced重启、动画长帧 | [OS17性能实测](references/os17-performance.md) |
 
 ## 选择修复的顺序
 
