@@ -115,7 +115,9 @@ jobs:
       - name: Repack ReSukiSU boot once and create TWRP ZIP
         run: python3 resukisu/package.py
       - name: Test installer guards without accessing devices
-        run: python3 resukisu/test_installer.py
+        run: |
+          python3 resukisu/test_installer.py
+          python3 resukisu/test_boot_compatibility.py
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.metadata.outputs.prefix }}_kebab_boot-img

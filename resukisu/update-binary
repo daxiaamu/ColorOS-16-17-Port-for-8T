@@ -1,5 +1,5 @@
 #!/sbin/sh
-# Current-slot-only installer for the verified 19805 board and exact boot base.
+# Current-slot-only installer for the verified 19805 board and verified compatible boot bases.
 set -eu
 OUTFD=$2
 ZIP=$3
@@ -19,11 +19,15 @@ PART="/dev/block/by-name/boot$SLOT"
 [ -b "$PART" ] || abort '找不到启动分区 / Boot partition missing'
 [ "$(blockdev --getsize64 "$PART")" = 100663296 ] || abort '启动分区大小不符 / Unexpected partition size'
 # Generated from the exact base and result images. No eval or sourced ZIP content.
-FROM_HASH='@FROM_HASH@'
+ACCEPTED_HASHES='@FROM_HASH@ @COMPATIBLE_HASHES@'
 TO_HASH='@TO_HASH@'
-ACTUAL=$(sha256sum "$PART" | cut -d ' ' -f1)
+ACTUAL=$(sha256sum "$PART") || abort '无法读取 boot 校验值 / Cannot hash boot partition'
+ACTUAL=${ACTUAL%% *}
 [ "$ACTUAL" != "$TO_HASH" ] || { ui '已安装此版本 / Already installed'; exit 0; }
-[ "$ACTUAL" = "$FROM_HASH" ] || abort 'boot 基线不匹配；请先恢复对应原版 / Incompatible boot; restore matching base first'
+case " $ACCEPTED_HASHES " in
+ *" $ACTUAL "*) ;;
+ *) abort 'boot 基线不匹配；请先恢复对应原版 / Incompatible boot; restore matching base first';;
+esac
 TMP=$(mktemp -d /tmp/resukisu8t.XXXXXX) || abort 'Cannot create temporary directory'
 trap 'rm -rf "$TMP"' EXIT
 unzip -p "$ZIP" images/boot.img > "$TMP/new.img" || abort '解压失败 / Extraction failed'
@@ -33,10 +37,10 @@ BACKUPDIR=/sdcard/ReSukiSU-8T-backup
 mkdir -p "$BACKUPDIR" || abort '请先解密/挂载 data / Mount decrypted data for backup'
 BACKUP="$BACKUPDIR/boot${SLOT}_${ACTUAL}.img"
 if [ -f "$BACKUP" ]; then
- [ "$(sha256sum "$BACKUP" | cut -d ' ' -f1)" = "$FROM_HASH" ] || abort 'Existing backup is invalid'
+ [ "$(sha256sum "$BACKUP" | cut -d ' ' -f1)" = "$ACTUAL" ] || abort 'Existing backup is invalid'
 else
  dd if="$PART" of="$BACKUP" bs=1048576 || abort '备份失败 / Backup failed'
- [ "$(sha256sum "$BACKUP" | cut -d ' ' -f1)" = "$FROM_HASH" ] || abort '备份校验失败 / Backup hash mismatch'
+ [ "$(sha256sum "$BACKUP" | cut -d ' ' -f1)" = "$ACTUAL" ] || abort '备份校验失败 / Backup hash mismatch'
 fi
 ui "写入当前槽位 $SLOT / Writing current slot $SLOT"
 if dd if="$TMP/new.img" of="$PART" bs=1048576 conv=fsync && [ "$(sha256sum "$PART" | cut -d ' ' -f1)" = "$TO_HASH" ]; then
@@ -45,6 +49,6 @@ if dd if="$TMP/new.img" of="$PART" bs=1048576 conv=fsync && [ "$(sha256sum "$PAR
 else
  ui '写入失败，正在恢复备份 / Write failed; restoring backup'
  dd if="$BACKUP" of="$PART" bs=1048576 conv=fsync || abort '恢复失败，请勿重启 / Restore failed; do not reboot'
- [ "$(sha256sum "$PART" | cut -d ' ' -f1)" = "$FROM_HASH" ] || abort '恢复校验失败，请勿重启 / Restore verification failed; do not reboot'
+ [ "$(sha256sum "$PART" | cut -d ' ' -f1)" = "$ACTUAL" ] || abort '恢复校验失败，请勿重启 / Restore verification failed; do not reboot'
  abort '已恢复原 boot / Original boot restored'
 fi

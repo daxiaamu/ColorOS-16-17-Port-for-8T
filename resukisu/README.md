@@ -8,7 +8,7 @@ Actions outputs the finished ReSukiSU boot image, the unmodified official ReSuki
 
 Open Actions > ReSukiSU for OnePlus 8T > Run workflow. Download the artifacts ending in `_kebab_boot-img`, `_official-manager-APK`, and `_kebab_TWRP`. Back up first. In TWRP, decrypt/mount data and install the patch ZIP, then reboot manually. A mismatched or Magisk-modified boot is rejected; restore the matching original boot before installing.
 
-The installer verifies project 19805, the current A/B slot, the 96 MiB boot partition, and full input/output SHA256. It backs up boot to `/sdcard/ReSukiSU-8T-backup`, writes only current-slot boot, and verifies the readback. It never switches slots, formats data, or writes recovery/super/firmware. On a write failure it attempts to restore and verify the backup.
+The installer verifies project 19805, the current A/B slot, the 96 MiB boot partition, and full input/output SHA256 against the reviewed compatible boot list. It backs up boot to `/sdcard/ReSukiSU-8T-backup`, writes only current-slot boot, and verifies the readback. It never switches slots, formats data, or writes recovery/super/firmware. On a write failure it attempts to restore and verify the backup.
 
 ## Official APK compatibility
 
@@ -48,3 +48,10 @@ The visual result also requires the selected ROM SystemUI changes and ROM-side l
 `module-patches/0002-aw8697-kebab-ime-waveforms.patch` changes only the 1815 table's RTP 110/111/112 filenames to the existing unsuffixed OEM fingerprint_effect1/2/3 resources. This is a port compatibility mapping, not a claim that ReSukiSU introduced the original problem: the stock kernel also contains the reserved table. No other motor/frequency table, index, timing or gain is changed. The ROM's separately verified RAM mapping for effect157/158/159 remains untouched and takes precedence whenever those requests use RAM. The new RTP mapping requires physical haptic validation; existing filenames and host tests do not establish equivalent feel.
 
 The build compiles actual C selection functions for regression checks (both OOS and non-OOS), checks all unchanged table entries, and exercises the selected AOD predicate and deferred-backlight block. It also verifies OPLUS_BUG_STABILITY and CONFIG_OPLUS_HAPTIC_OOS in actual driver compilation commands, not only .config. Test reports are included with kernel artifacts. OEM module certificate/CRC checks and boot component identity checks remain mandatory. The kernel timestamp now comes from the build repository commit instead of a fixed September 12 timestamp.
+
+
+## ROM 20260916 boot compatibility (installer revision 20260920)
+
+The 20260916 ROM ships boot SHA256 `bdd8967199778d244d908e1adc8b5a85e614fdbd47db59df642ad0c7b29a0751`, while older installers accepted only the original `3f06497b...be76b7` input. Its unpacked header, ramdisk and DTB exactly match the packaging base. `compatible_boots.json` records that reviewed full-image hash and preserved component hashes. Packaging refuses compatibility entries with different components, size or malformed hashes. It does not accept arbitrary modified boots.
+
+The installer accepts both reviewed bases, backs up the actual incoming image, and verifies backups and rollback against that incoming hash. Tests cover both bases, already-installed output, unknown boot, corrupt/short payload, existing backup mismatch and partial-write recovery. The local `bootcompat-20260920` ZIP reuses the unchanged rc2/35153 kernel and boot payload; it is an installer-only revision. The ROM ZIP does not need modification.
