@@ -41,3 +41,21 @@ OS14硬件兼容OShare14.6.1保留，versionCode为2140000000，足以阻止常�
 OS17原生分配模型仍为999-index。只调整OplusMultiAppConfig.getMaxCloneUserNum到20，并使framework和service识别范围下界均为980，保留原上界999与配置检查。979应拒绝，980/989/990/999通过。不要只改菜单数值、扩大普通用户配额或直接复活OS16未复现的存储修复。
 
 DEX039/hiddenAPI信息应保持；分析时为反编译移除的hiddenAPI表不得回填ROM。本次采用方法锚定的字节修改并更新校验，变更JAR的旧完整性元数据不能原样保留。设置显示“最多20个”和边界探针通过，不代表20份应用全生命周期都已验证。
+
+## 智慧感知入口：不要用近似名称替代功能
+
+dev40 曾把前摄识别支付终端的智感支付标成智慧弹码，用户用背盖敲击示意纠正；dev41 已删除错误行。MOD 总入口保留，仅列当前实际存在且可跳转的隔空手势。缺失入口按用户要求不展示。
+
+Gesture 中虽有背壳敲击引用，目标 com.oplus.cupid / oplus.cupid.intent.action.KnockShellTwiceSettings 在本机不存在；这既不能证明它等同用户图片功能，也不能只开启 com.oplus.gesture.support_knock_shell 就宣称可用。隔空接听另见 [AON 实际修复](os17-air-gesture.md)。
+
+## 相机隐藏功能与相册慢动作实况
+
+当前相机 5.9.84 已与 OS16 验收补丁 APK 哈希一致（8a5334f16cb65878db9cf37903c55c5a795e16135e2ce9e51907e83e353a9aff），先核对而非再叠补丁：
+
+- Filter.IsNightCityAndNorthCaliforniaEnabled：夜之城、加州北部限定滤镜。
+- NightCaptureMode.IsFilterEnabled：夜景滤镜面板。
+- SlowMotionCaptureMode.EnableFlashModeActionItemWhenCapturing：慢动作录制期间切换补光。
+
+本轮实际查看滤镜与夜景面板，1080p/240fps 短录制中开/关补光可见；没有再次修改相机。UI 动画中旧 XML 可能仍是前一模式，须配合新截图核对。拍摄 intent 使用 android.media.action.STILL_IMAGE_CAMERA。
+
+用户确认“慢动作实况”指相册编辑实况照片，不是相机直接拍摄，也不是旧 video_editor_olive_save_max_duration 导出时长补丁。相册 17.8.40 先修复了 [漏扫](os17-product-scan.md)；os.graphic.gallery.photoeditor.olive.slow_motion 还依赖项目保存、基础 olive 与 API/机型条件，实体编辑待验收，不能只强开一个键就宣称完成。用户已决定不做会被商店更新覆盖的导出时长 APK 修改，不自动恢复该任务。

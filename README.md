@@ -10,6 +10,8 @@
 
 > 使用 $coloros-port-8t，先读OS17专项状态，根据已验证的PLK110→8T经验分析这份新供体；重新核对输入哈希、设备与内核，不直接重放旧偏移，也不把候选当成已刷入。
 
+本次 2026-09-20 补充了 [无线回调协议](skills/coloros-port-8t/references/os17-radio-callback.md)、[隔空接听](skills/coloros-port-8t/references/os17-air-gesture.md)、[闪充展示](skills/coloros-port-8t/references/os17-charge-display.md)、[相册/游戏助手漏扫](skills/coloros-port-8t/references/os17-product-scan.md)、[晕动舒缓与音量](skills/coloros-port-8t/references/os17-motion-volume.md) 以及 [安装器失败经验](skills/coloros-port-8t/references/os17-native-installer.md)。已安装组合更新到 dev47，未完成实测与撤回候选单独标记，完整开发 ZIP 仍为 dev24。
+
 ## 实机截图
 
 [查看全部 46 张 ColorOS 16 一加 8T 截图](screenshots/README.md)。

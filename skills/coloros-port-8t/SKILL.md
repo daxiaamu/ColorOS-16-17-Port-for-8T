@@ -42,6 +42,12 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 此分支为PLK110供体在8T上的开发验证，不代表所有硬件或正式发布验收。保留上面的通用工作流，遇到下列问题再读取对应资料：
 
 | 场景 | 参考 |
+| 无线辅助服务回调空指针、protected Parcel 错误 | [Binder V4 协议对齐](references/os17-radio-callback.md) |
+| 隔空接听开关有效但无识别、AIBoost 加载或 NPU 崩溃 | [Camera2、ABI 与 CPU 后端](references/os17-air-gesture.md) |
+| 闪充瓦数、状态栏蓝色图标门槛 | [OS17 充电展示](references/os17-charge-display.md) |
+| 相册/游戏助手 APK 存在但未注册 | [Overlay 与原生扫描](references/os17-product-scan.md) |
+| 晕动舒缓没有圆点、300% 音量能力 | [运动传感器与音量](references/os17-motion-volume.md) |
+| 原生安装器、COUI 风格、ADB 回退或 OPEX 重启 | [候选与已撤回实验](references/os17-native-installer.md) |
 |---|---|
 | SIM已识别但电话不可用、IMS HAL unavailable | [恢复IMS HIDL兼容](references/os17-ims-hidl.md) |
 | 小前置包能否略过、还原结果哈希失败 | [增量OTA链与verity范围](references/os17-ota-reconstruction.md) |
