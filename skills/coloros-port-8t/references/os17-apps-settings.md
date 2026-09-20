@@ -32,7 +32,7 @@ OS14硬件兼容OShare14.6.1保留，versionCode为2140000000，足以阻止常�
 
 ## 主题与精选服务
 
-栏目缺失先查安装源、主题资源闭包、索引与加载条件，不默认删除在线服务。补入OS16山之道Nature05使新目录出现第4个条目；候选只删除该旧条目及空组，保留新版3个和用户当前选择，不盲删所有同名资源。尚需刷后数量验收。
+栏目缺失先查安装源、主题资源闭包、索引与加载条件，不默认删除在线服务。补入OS16山之道Nature05使新目录出现第4个条目；候选只删除该旧条目及空组，保留新版3个和用户当前选择，不盲删所有同名资源。dev35 已固化索引去重；不要把同名资源文件本身当作多余目录项。
 
 “精选服务数据加载异常”在本轮重新从桌面进入时正常并可打开详情，未复现；没有清数据或改网络，不能宣称已修复原因。不要用权限被拒的直接Activity启动取代受保护的原生入口。
 
@@ -59,3 +59,9 @@ Gesture 中虽有背壳敲击引用，目标 com.oplus.cupid / oplus.cupid.inten
 本轮实际查看滤镜与夜景面板，1080p/240fps 短录制中开/关补光可见；没有再次修改相机。UI 动画中旧 XML 可能仍是前一模式，须配合新截图核对。拍摄 intent 使用 android.media.action.STILL_IMAGE_CAMERA。
 
 用户确认“慢动作实况”指相册编辑实况照片，不是相机直接拍摄，也不是旧 video_editor_olive_save_max_duration 导出时长补丁。相册 17.8.40 先修复了 [漏扫](os17-product-scan.md)；os.graphic.gallery.photoeditor.olive.slow_motion 还依赖项目保存、基础 olive 与 API/机型条件，实体编辑待验收，不能只强开一个键就宣称完成。用户已决定不做会被商店更新覆盖的导出时长 APK 修改，不自动恢复该任务。
+
+## Google 快速分享与 OShare 区分（dev52）
+
+添加后磁贴从面板和候选目录都消失时，检查真实 GMS 组件状态及共同能力策略。此轮只移除 oplus_google_cn_gms_features.xml 中 cn.google.services 与 com.google.android.feature.services_updater 两项，恢复已验证的 GMS 能力策略。通过 Google 设置原生 Quick Share 初始化重新启用组件，不硬写全局磁贴布局、不改 APK或清数据。
+
+真实组件为 com.google.android.gms/.nearby.sharing.SharingTileService；原生添加、点击进入设置、删除后目录仍可见、重加与重启保持通过。未实测真实文件传输，不能与用户确认可用的一加互传混为一项。

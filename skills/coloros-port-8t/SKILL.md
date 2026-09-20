@@ -49,6 +49,9 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 | 晕动舒缓没有圆点、300% 音量能力 | [运动传感器与音量](references/os17-motion-volume.md) |
 | 原生安装器、COUI 风格、ADB 回退或 OPEX 重启 | [候选与已撤回实验](references/os17-native-installer.md) |
 |---|---|
+| 酷安实况 Surface 切换失败、相册点击编辑退出 | [媒体兼容](references/os17-media-compat.md)：保留原生错误与回退，分别验收播放器和编辑器 |
+| 默认强制模式、MOD SELinux 切换、状态误显示 | [SELinux 与 MOD](references/os17-selinux-mod.md)：精确标签、受限属性、真实内核状态 |
+| 无线回调空指针、隔空接听、GPU 崩溃、输入法/来电振动 | [运行时兼容](references/os17-runtime-compat.md)：协议/ABI/能力声明与实际场景 |
 | SIM已识别但电话不可用、IMS HAL unavailable | [恢复IMS HIDL兼容](references/os17-ims-hidl.md) |
 | 小前置包能否略过、还原结果哈希失败 | [增量OTA链与verity范围](references/os17-ota-reconstruction.md) |
 | 新山之道切换后黑壁纸 | [初始布局与COZ2修复](references/os17-mountain-wallpaper.md) |

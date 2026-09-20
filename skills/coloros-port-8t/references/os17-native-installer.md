@@ -1,7 +1,5 @@
 # OS17 原生安装器与 COUI 界面
 
-**当前状态（2026-09-20）：已恢复原安装器；dev37e 仅离线候选，未装入当前 dev47 组合。下文是候选方法与失败经验，不是已完成的系统功能。**
-
 ## 先区分流程与外观
 
 ColorOS 16 的历史方案是替换安装器并在框架中恢复标准 ADB 安装回退。OS17 不应直接覆盖旧 APK：当前 PLK110 安装器已带 AOSP v2 的 InstallLaunch / UninstallLaunch 和原厂 COUI 控件，可复用原生事务模型，再适配共用对话框。
@@ -30,7 +28,7 @@ ColorOS 16 的历史方案是替换安装器并在框架中恢复标准 ADB 安�
 
 dev37 候选相对已验证基线只改变 system/framework/oplus-services.jar 和 system_ext/priv-app/OppoPackageInstaller/OppoPackageInstaller.apk。两分区内容、inode 和 SELinux 标签审计零差异；镜像均可放入现有逻辑容量。
 
-运行候选已撤回，后续 dev37e 尚未刷入；不能将本页候选描述当作完成状态。完整 ZIP 仍是历史 dev24，后续增量不自动进入旧包。
+此处是早期 dev37 候选阶段记录。最终 dev49c 的验收与后继交付状态见下文及[当前状态](os17-current-status.md)。
 
 ## 清单缓存与本地化
 
@@ -47,3 +45,9 @@ dev37 候选相对已验证基线只改变 system/framework/oplus-services.jar �
 仅复制ZIP中的META-INF条目并不足够。供体使用APK Signing Block；zipfile重打包会丢失ZIP条目之外的V2块。早期dev37构建漏保留该块，旧包缓存一度掩盖问题，重新扫描后候选无法正常启动。dev37d按既有OS17构建流程先zipalign，再保留原始签名块并调整中央目录偏移；核对块完整性、对齐、ZIP CRC和三项内容差异。这保留系统分区信任路径需要的原证书元数据，不是原厂重新签名，也不能通过普通侧载的密码学内容校验。未改动系统签名校验规则。
 
 启动异常同时出现过OPEX重启记录；不能只凭重启原因就认定时间戳是唯一根因。最终候选撤回整分区时间变化，修正签名容器遗漏，并必须在新路径重新扫描、重启及真实安装回归后才能验收。
+
+## dev49c 最终界面与真实事务验收
+
+保留新版基线其它 DEX，仅合入原已审计的 ADB 接收器缺失回退。安装器使用 PackageInstaller8T 路径。深色 app label 对比不足时，Android textColorPrimary/Secondary 实验仍继承浅色值，已撤回；改为从同一 COUI dialog context 取得 couiColorPrimaryNeutral/couiColorSecondNeutral 的 ColorStateList，回收 TypedArray。不叠加旧配色实验、不改变事务检查。
+
+最终 5,513 类语义往返、分区内容/元数据/读回通过。实机新装、更新、卸载、取消以及浅深色截图通过；ADB 新装/更新通过，未签名负例被拒且原版本保留。先前同事务模型的卸载取消、UI 降级拒绝、不可信来源提示另有验证。预览页不替代系统实际事务；独立 Contacts preInflate 异常未被该补丁处理。发布状态以当前状态页为准。
