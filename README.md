@@ -14,7 +14,7 @@
 
 ## 实机截图
 
-[查看全部 26 张 ColorOS 17 一加 8T 截图](screenshots/coloros-17/README.md) · [博客 Markdown](screenshots/coloros-17/blog-jsdelivr.md)。
+[查看全部 26 张 ColorOS 17 一加 8T 截图](screenshots/README.md) · [博客 Markdown](screenshots/blog-jsdelivr.md)。
 
 
 
