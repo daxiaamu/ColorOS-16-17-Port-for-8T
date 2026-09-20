@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "rom": "ColorOS16",
+  "baseline": "ColorOS16.0.10-port-kebab-20260916",
+  "boots": [
+    {
+      "name": "Original public ColorOS16 boot input",
+      "sha256": "3f06497bfa6d31d4f7209246a224090e207eaec23b0d769a376d318894be76b7",
+      "bytes": 100663296,
+      "preserved_components": {
+        "dtb": "602fd534fd2af41da425df9a45caa169805cd87cd89bb825eec3a3e11e7d0cdb",
+        "header": "01fd2ffbf5f4c9252eaa276fba5477d44001ec1d54e72ffc79667afb2b8a0b0c",
+        "ramdisk.cpio": "f7bb618e0dfb7eaafb20f6f0d410867652591efd95e7848d1c2fee1cb6137ece"
+      }
+    },
+    {
+      "name": "ColorOS16.0.10-port-kebab-20260916-twrp.zip / images/boot.img",
+      "sha256": "bdd8967199778d244d908e1adc8b5a85e614fdbd47db59df642ad0c7b29a0751",
+      "bytes": 100663296,
+      "preserved_components": {
+        "dtb": "602fd534fd2af41da425df9a45caa169805cd87cd89bb825eec3a3e11e7d0cdb",
+        "header": "01fd2ffbf5f4c9252eaa276fba5477d44001ec1d54e72ffc79667afb2b8a0b0c",
+        "ramdisk.cpio": "f7bb618e0dfb7eaafb20f6f0d410867652591efd95e7848d1c2fee1cb6137ece"
+      }
+    }
+  ]
+}

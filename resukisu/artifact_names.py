@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import json, os, re
 
-def artifact_names(build_date=None, sources=None):
+def artifact_names(build_date=None, sources=None, rom=None):
  if sources is None: sources=json.loads(Path(__file__).with_name('sources.json').read_text())
  match=re.fullmatch(r'ReSukiSU_(v[0-9][A-Za-z0-9.-]*)_([0-9]+)-arm64-v8a-release\.apk',sources['official_manager_apk'])
  if not match: raise ValueError('Unrecognized locked official APK filename')
@@ -12,9 +12,11 @@ def artifact_names(build_date=None, sources=None):
  date=build_date or os.environ.get('RESUKISU_BUILD_DATE') or datetime.now(timezone(timedelta(hours=8))).strftime('%Y%m%d')
  if not re.fullmatch(r'[0-9]{8}',date): raise ValueError('Build date must be YYYYMMDD')
  datetime.strptime(date,'%Y%m%d')
+ if rom not in (None,'ColorOS16','ColorOS17'): raise ValueError('Unknown ROM profile')
  prefix=f'ReSukiSU_{version}_{code}_{date}'
+ image_prefix=prefix+('_'+rom if rom else '')
  return {'prefix':prefix,'version':version,'version_code':code,'build_date':date,
-         'boot':prefix+'_kebab_boot.img','twrp':prefix+'_kebab_TWRP.zip',
+         'boot':image_prefix+'_kebab_boot.img','twrp':image_prefix+'_kebab_TWRP.zip',
          'apk':prefix+'_arm64-v8a-release.apk'}
 
 if __name__=='__main__':

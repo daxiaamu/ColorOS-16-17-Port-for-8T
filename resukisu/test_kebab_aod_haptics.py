@@ -70,6 +70,10 @@ helper=function(display,'static bool dsi_panel_amb655x_skip_display_off(')
 start=display.index('\tif (!rc &&\n\t    panel->cur_mode->priv_info->cmd_sets[DSI_CMD_POST_ON_BACKLIGHT].count)')
 backlight=display[start:display.index('\n\tset_oplus_display_power_status',start)]
 assert 'if (dsi_panel_amb655x_skip_display_off(panel, type, cmds, count)) {\n\t\tcmds++;\n\t\tcount--;\n\t}' in display
+entry_start=display.index('\t/* Record how this cycle entered AOD;')
+entry=display[entry_start:display.index('\toplus_set_aod_gamma_data_status(panel);',entry_start)]
+clear='\tif (!rc && amb655x_direct_aod_panel == panel)\n\t\tamb655x_direct_aod_panel = NULL;'
+assert clear in display
 aod=r'''
 #include <assert.h>
 #include <stdbool.h>
@@ -85,22 +89,31 @@ struct dsi_panel_cmd_set {struct dsi_cmd_desc *cmds;u32 count;};
 struct priv {struct dsi_panel_cmd_set cmd_sets[4];};
 struct mode {struct priv *priv_info;};
 struct dsi_panel {int power_mode;struct {const char *vendor_name;} oplus_priv;bool need_power_on_backlight;struct mode *cur_mode;};
-'''+helper+'\nstatic void finish(struct dsi_panel *panel,int rc) {panel->need_power_on_backlight=true;\n'+backlight+r'''
+static struct dsi_panel *amb655x_direct_aod_panel;
+'''+helper+'\nstatic void finish(struct dsi_panel *panel,int rc) {panel->need_power_on_backlight=true;\n'+entry+backlight+'\n}\nstatic void leave(struct dsi_panel *panel,int rc) {\n'+clear+r'''
 }
 int main(void) {
  unsigned cases=0;
  for(int vendor=0;vendor<2;vendor++) for(int power=0;power<4;power++)
- for(int type=0;type<4;type++) for(int count=0;count<4;count++) for(int v=0;v<6;v++) {
+ for(int type=0;type<4;type++) for(int count=0;count<4;count++) for(int v=0;v<6;v++) for(int cycle=0;cycle<3;cycle++) {
   u8 data=v==1 ? 0x29 : 0x28;
   struct dsi_cmd_desc cmd={{v==2 ? 0x39 : 5,v==3 ? 2 : 1,v==4 ? NULL : &data}};
   struct dsi_cmd_desc *cmds=v==5 ? NULL : &cmd;
   struct priv priv={0};struct mode mode={&priv};
   struct dsi_panel p={power,{vendor ? "OTHER" : "AMB655X"},true,&mode};
-  bool expected=!vendor && count>1 && v==0 && ((type==DSI_CMD_SET_LP1 && power==SDE_MODE_DPMS_ON) || (type==DSI_CMD_SET_NOLP && (power==SDE_MODE_DPMS_LP1 || power==SDE_MODE_DPMS_LP2)));
+  struct dsi_panel other=p;
+  struct dsi_panel *previous=cycle==1 ? &p : (cycle==2 ? &other : NULL);
+  amb655x_direct_aod_panel=previous;
+  bool expected=!vendor && count>1 && v==0 && ((type==DSI_CMD_SET_LP1 && power==SDE_MODE_DPMS_ON) || (type==DSI_CMD_SET_NOLP && cycle==1 && (power==SDE_MODE_DPMS_LP1 || power==SDE_MODE_DPMS_LP2)));
   assert(dsi_panel_amb655x_skip_display_off(&p,type,cmds,count)==expected);
   priv.cmd_sets[DSI_CMD_SET_LP1]=(struct dsi_panel_cmd_set){cmds,count};
   for(int post=0;post<2;post++) for(int failure=0;failure<2;failure++) {
+   amb655x_direct_aod_panel=previous;
    priv.cmd_sets[DSI_CMD_POST_ON_BACKLIGHT].count=post;finish(&p,failure ? -1 : 0);
+   struct dsi_panel *recorded=vendor ? previous : (!failure && power==SDE_MODE_DPMS_ON && count>1 && v==0 ? &p : NULL);
+   assert(amb655x_direct_aod_panel==recorded);
+   leave(&p,-1); assert(amb655x_direct_aod_panel==recorded);
+   leave(&p,0); assert(amb655x_direct_aod_panel==(recorded==&p ? NULL : recorded));
    assert(p.need_power_on_backlight==!(!failure && post && !vendor && power==SDE_MODE_DPMS_ON && count>1 && v==0));cases++;
   }
  }

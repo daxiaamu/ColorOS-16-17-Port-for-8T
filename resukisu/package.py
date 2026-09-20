@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import hashlib,gzip,json,os,shutil,subprocess,urllib.request,zipfile
+import argparse,hashlib,gzip,json,os,shutil,subprocess,urllib.request,zipfile
 from boot_compatibility import compatible_hashes
 from artifact_names import artifact_names
-N=artifact_names()
-R=Path(__file__).resolve().parent; S=json.loads((R/'sources.json').read_text()); W=Path('packaging-work').resolve(); W.mkdir(); D=Path('dist').resolve(); D.mkdir()
+parser=argparse.ArgumentParser()
+parser.add_argument('--rom',required=True,choices=['ColorOS16','ColorOS17'])
+args=parser.parse_args()
+N=artifact_names(rom=args.rom)
+R=Path(__file__).resolve().parent; S=json.loads((R/'sources.json').read_text()); W=(Path('packaging-work')/args.rom).resolve(); W.mkdir(parents=True); D=(Path('dist')/args.rom).resolve(); D.mkdir(parents=True)
 assert json.loads(Path('kernel-output/sources.json').read_text()) == S, 'Kernel/package source locks differ'
 
 def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
@@ -21,8 +24,11 @@ def run(*args,cwd): subprocess.run([str(mb),*map(str,args)],cwd=cwd,check=True)
 work=W/'repack'; work.mkdir(); run('unpack','-h',base,cwd=work)
 original={p.name:sha(p) for p in work.iterdir() if p.is_file() and p.name!='kernel'}
 assert 'ramdisk.cpio' in original and 'dtb' in original
-extra_hashes=compatible_hashes(R/'compatible_boots.json',original,S['boot_partition_bytes'])
-accepted_hashes=list(dict.fromkeys([S['base_boot_sha256'],*extra_hashes]))
+profile_path=R/'profiles'/(args.rom+'.json')
+profile=json.loads(profile_path.read_text())
+assert profile['rom']==args.rom
+accepted_hashes=compatible_hashes(profile_path,original,S['boot_partition_bytes'])
+assert accepted_hashes, 'ROM must have an explicit accepted boot list'
 # Reject rooted/private boot inputs, even if a future lockfile accidentally points to one.
 run('cpio','ramdisk.cpio','test',cwd=work)
 ramdisk=(work/'ramdisk.cpio').read_bytes()
@@ -36,10 +42,10 @@ verify=W/'verify'; verify.mkdir(); run('unpack','-h',p,cwd=verify)
 assert sha(verify/'kernel')==sha(Path('kernel-output/Image'))
 for name,digest in original.items(): assert sha(verify/name)==digest, f'Boot component changed: {name}'
 newsha=sha(p)
-manifest={'artifact_names':N,'status':'compiled-and-offline-verified; NOT device-boot-tested','device':'OnePlus 8T KB2000 / project 19805','slot_policy':'current only; no slot switch','base_boot_sha256':S['base_boot_sha256'],'accepted_boot_sha256':accepted_hashes,'boot_sha256':newsha,'boot_bytes':p.stat().st_size,'preserved_components':original,'source_locks':S,'module_abi_runtime_validation':'pending','selinux':'original enforcing configuration retained','manager_support':'official ReSukiSU Actions/TG certificate; see manager-compatibility.json'}
+manifest={'artifact_names':N,'rom':args.rom,'rom_baseline':profile['baseline'],'rom_profile':profile,'status':'compiled-and-offline-verified; NOT device-boot-tested','device':'OnePlus 8T KB2000 / project 19805','slot_policy':'current only; no slot switch','base_boot_sha256':S['base_boot_sha256'],'accepted_boot_sha256':accepted_hashes,'boot_sha256':newsha,'boot_bytes':p.stat().st_size,'preserved_components':original,'source_locks':S,'module_abi_runtime_validation':'pending','selinux':'original enforcing configuration retained','manager_support':'official ReSukiSU Actions/TG certificate; see manager-compatibility.json'}
 (D/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 # The standalone download and ZIP payload share this single repacked image.
-script=(R/'update-binary').read_text().replace('@FROM_HASH@',S['base_boot_sha256']).replace('@TO_HASH@',newsha).replace('@COMPATIBLE_HASHES@',' '.join(extra_hashes))
+script=(R/'update-binary').read_text().replace('@FROM_HASH@',accepted_hashes[0]).replace('@TO_HASH@',newsha).replace('@COMPATIBLE_HASHES@',' '.join(accepted_hashes[1:])).replace('@ROM_NAME@',args.rom)
 with zipfile.ZipFile(D/N['twrp'],'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
  entry=zipfile.ZipInfo('META-INF/com/google/android/update-binary'); entry.external_attr=0o100755<<16; z.writestr(entry,script)
  z.writestr('META-INF/com/google/android/updater-script','# Handled by update-binary\n')

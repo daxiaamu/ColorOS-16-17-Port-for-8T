@@ -21,6 +21,7 @@ PART="/dev/block/by-name/boot$SLOT"
 # Generated from the exact base and result images. No eval or sourced ZIP content.
 ACCEPTED_HASHES='@FROM_HASH@ @COMPATIBLE_HASHES@'
 TO_HASH='@TO_HASH@'
+ui 'ReSukiSU for @ROM_NAME@ / kebab'
 ACTUAL=$(sha256sum "$PART") || abort '无法读取 boot 校验值 / Cannot hash boot partition'
 ACTUAL=${ACTUAL%% *}
 [ "$ACTUAL" != "$TO_HASH" ] || { ui '已安装此版本 / Already installed'; exit 0; }

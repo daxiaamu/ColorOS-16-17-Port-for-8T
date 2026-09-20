@@ -1,3 +1,7 @@
+# Current dual-ROM pipeline
+
+Each run builds ColorOS16 and ColorOS17 boot/TWRP pairs with one shared official manager/source lock. See [dual-ROM design](docs/dual-rom.md). Profiles in `profiles/` are authoritative; `compatible_boots.json` below is a historical OS16 record. The old v6 display patch is replaced by `patches/0002-amb655x-aod-per-cycle.patch`. Historical validation below is not new-build device acceptance.
+
 # ReSukiSU for the ColorOS 16 OnePlus 8T port
 
 > Validation status (2026-09-13): the initial build failed to boot because the OEM module verification certificate and two stock ABI requirements were missing. The build now includes the OEM public certificate, the upstream negative-advice race fix already used by the stock vendor modules, and `BRAND_SHOW_FLAG=oneplus` for the original power-supply enum. Actions must pass the certificate and all 976 imported kernel-symbol CRC checks before packaging. Updated artifacts are **offline-validated only**; no installation or device boot test is performed for this revision. Earlier artifacts remain unsuitable for use.

@@ -28,7 +28,9 @@ jobs:
           packages: platform-tools build-tools;36.0.0
           log-accepted-android-sdk-licenses: false
       - name: Test official build selection guards
-        run: python3 resukisu/test_official_manager.py
+        run: |
+          python3 resukisu/test_official_manager.py
+          python3 resukisu/test_rom_profiles.py
       - id: names
         name: Resolve and verify latest official main-branch manager
         env:
@@ -99,6 +101,10 @@ jobs:
           if-no-files-found: error
   package:
     needs: [metadata, kernel]
+    strategy:
+      fail-fast: false
+      matrix:
+        rom: [ColorOS16, ColorOS17]
     env:
       RESUKISU_BUILD_DATE: ${{ needs.metadata.outputs.build_date }}
     runs-on: ubuntu-22.04
@@ -114,22 +120,34 @@ jobs:
           name: kernel
           path: kernel-output
       - name: Repack ReSukiSU boot once and create TWRP ZIP
-        run: python3 resukisu/package.py
+        run: python3 resukisu/package.py --rom ${{ matrix.rom }}
       - name: Test installer guards without accessing devices
         run: |
           python3 resukisu/test_installer.py
           python3 resukisu/test_boot_compatibility.py
+          python3 resukisu/test_rom_profiles.py
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ needs.metadata.outputs.prefix }}_kebab_boot-img
-          path: dist/*_kebab_boot.img
+          name: ${{ needs.metadata.outputs.prefix }}_${{ matrix.rom }}_kebab_boot-img
+          path: dist/${{ matrix.rom }}/*_kebab_boot.img
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ needs.metadata.outputs.prefix }}_kebab_TWRP
+          name: ${{ needs.metadata.outputs.prefix }}_${{ matrix.rom }}_kebab_TWRP
           path: |
-            dist/*_kebab_TWRP.zip
-            dist/*.json
-            dist/*.txt
-            dist/*.md
+            dist/${{ matrix.rom }}/*_kebab_TWRP.zip
+            dist/${{ matrix.rom }}/*.json
+            dist/${{ matrix.rom }}/*.txt
+            dist/${{ matrix.rom }}/*.md
           if-no-files-found: error
+  verify-products:
+    needs: [metadata, kernel, package]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Verify both ROM products and official manager together
+        run: python3 resukisu/publish_dual_release.py artifacts --verify-only

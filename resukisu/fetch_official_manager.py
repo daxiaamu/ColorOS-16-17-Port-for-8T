@@ -99,7 +99,7 @@ def main():
     badging = subprocess.check_output([sdk_tool('aapt'),'dump','badging',str(apk)], text=True)
     version, code = APK_NAME.fullmatch(apk.name).groups()
     if args.latest:
-        assert int(code) >= sources.get('minimum_manager_version_code', 35137), 'Official manager would downgrade below the previously delivered build; review required'
+        assert int(code) >= sources.get('minimum_manager_version_code', 35153), 'Official manager would downgrade below the previously delivered build; review required'
     assert re.search(r"versionCode='"+re.escape(code)+r"'", badging), 'APK versionCode differs from filename'
     apk_version = re.search(r"versionName='([^']+)'", badging).group(1)
     assert apk_version.lstrip('v') == version.lstrip('v'), 'APK versionName differs from filename'
