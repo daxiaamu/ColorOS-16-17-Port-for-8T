@@ -1,16 +1,16 @@
 # ColorOS 17 当前状态与验收边界
 
-当前发布版本：20260921 NoRoot r1。供体 PLK110_11.C.61 / ColorOS 17.0.0.100(SP09CN01)，目标 OnePlus 8T KB2000、已验证的 4.19 内核与 Android 14 硬件底层。供体文件分析不授权操作供体手机。
+资料更新至 dev62（2026-09-21），已发布完整包仍为 20260921 NoRoot r1；后继增量不等于已进入该包。供体 PLK110_11.C.61 / ColorOS 17.0.0.100(SP09CN01)，目标 OnePlus 8T KB2000、已验证的 4.19 内核与 Android 14 硬件底层。供体文件分析不授权操作供体手机。
 
 ## 区分设备、镜像与完整包
 
 | 层级 | 当前证据 | 验收边界 |
 |---|---|---|
 | 历史 dev24 | TWRP 完整安装、授权 Format Data 后首次启动 | 历史开发 boot 为 permissive/含 ROOT 基线，不是当前发布策略 |
-| 当前设备 | dev54e NoRoot Enforcing、MOD 两种 SELinux 模式重启保持；dev55 酷安实况修复完整回读和重复播放通过 | 逐项增量验收，不代表新版完整 ZIP 双清通过 |
-| 20260921 NoRoot r1 | 汇总至 dev55，系统显示日期改为 20260921；15 分区内容、34 ZIP 载荷哈希、全部条目 CRC、A/B 元数据和 NAS 副本校验通过 | 新 ZIP 双清和 B 槽实机刷入待验收；未自动刷入手机 |
+| 当前开发设备 | dev57 QQ、dev58 分身、dev59r2 后台安装器、dev61r2 热点、dev62 图标分别刷入与分项验收；Enforcing、ADB Root 已关闭 | 沿用调试 boot，不能称当前设备 NoRoot；dev60 系统侧扫一扫未刷入，完整 ZIP 未合入上述增量 |
+| 20260921 NoRoot r1 | 汇总至 dev55，后续同版本换入 SIGPIPE 修订 TWRP 和 MOD 主页 URL；显示日期为 20260921；15 分区内容、34 ZIP 载荷哈希、全部条目 CRC、A/B 元数据和 NAS 副本校验通过 | 新 ZIP 双清和 B 槽实机刷入待验收；未自动刷入手机 |
 
-系统显示 `KB2000_17.0.0.100_PORT_DEV01_daxiaamu_20260921`。完整包 `ColorOS17.0.0-port-kebab-20260921-NoRoot-r1-twrp.zip`，10,388,108,488 字节；SHA256 `67fe05cedad20dbe442c5846c8cd8fcc12a86d7b2ce9eb430c0f3931d16904a1`。本技能仓库不包含 ROM 二进制。20260920 NoRoot r2 发布文件已按用户要求删除，历史构建输入与审计保留。
+系统显示 `KB2000_17.0.0.100_PORT_DEV01_daxiaamu_20260921`。完整包 `ColorOS17.0.0-port-kebab-20260921-NoRoot-r1-twrp.zip`，10,388,108,501 字节；SHA256 `6e273c2223e0f6a900cf9e367aad8f7494d8252b55a184723d9d0e814b3aabe9`。本技能仓库不包含 ROM 二进制。20260920 NoRoot r2 发布文件已按用户要求删除，历史构建输入与审计保留。
 
 ## 已固化且有证据的功能
 
@@ -23,7 +23,16 @@
 - dev42 无线回调协议兼容、dev44 隔空接听、dev50c GPU/输入法/来电振动，见[硬件运行时](os17-runtime-compat.md)。用户确认输入法、来电振动和挂断停止；隔空接听有用户真实来电确认。
 - dev51 相册图片编辑、裁剪、曝光、另存、冷重进通过；不代表所有 AI/云端/实况编辑通过。
 - dev55 酷安 16.6.2 实况大图硬件 HEVC 播放及两轮退出重进完整播放通过，见[媒体兼容](os17-media-compat.md)。
-- dev54 默认 Enforcing 与持久 MOD 兼容模式切换通过；最终设备 Enforcing、无 su、保留 USB 调试。策略是有限适配，不能称完全未改官方策略，见[SELinux](os17-selinux-mod.md)。
+- dev54 默认 Enforcing 与持久 MOD 兼容模式切换通过；当时交付基线 Enforcing、无 su、保留 USB 调试；后续调试设备状态见上表。策略是有限适配，不能称完全未改官方策略，见[SELinux](os17-selinux-mod.md)。
+
+## dev57–dev62 后继增量
+
+- [QQ 相机](thirdparty-camera-startup.md)：两次缺失 HAL 同步等待消除，用户确认正常预览。
+- [新建分身](clone-storage-groups.md)：OS17 复现后重定位媒体附加组刷新，新用户无需重启可从桌面打开。
+- [后台安装器](os17-native-installer.md)：收起保留安装事务，真实安装/取消与 UI 生命周期分别验收。
+- [热点](os17-hotspot.md)：扫描、WPA3 连接、DHCP、DNS、开关复测通过；外网上网未完成验收。
+- [MOD 图标](os17-apps-settings.md)：透明底 OS17 风格，浅深色与入口通过。
+- [小布扫一扫](os17-scanner-camera2.md)：APK 对照修复会被更新覆盖；系统侧 dev60 只有离线校验。当前恢复原版 APK 作对照，不能声称黑屏已由系统修好。后续重建须保留最新热点等修复。
 
 ## 不得扩大结论
 

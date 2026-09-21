@@ -29,3 +29,7 @@ QQ 扫一扫修复已加载到 8T，镜像读回、正常启动及用户实际�
 - 候选 system SHA256：`51202afb8eaa930cbf003b4e2cc132f9def37f2e5470034ef134719ea05b78f1`。
 - 合入下一完整包时重新验证 QQ 冷启动、原生相机和普通 Camera2 调用；微信、支付宝分别验收。应用内 CameraUnit 鉴权拒绝是另一问题，见 [小布扫一扫](scanner-camera2.md)。
 - 第一次候选启动失败实际来自复制构建树丢失链接属性，回退后修正，见 [Windows 构建](boot-and-build.md)。不能把打包失败归咎于能力判断后再叠补丁。
+
+## OS17 dev57
+
+QQ 9.3.65 的扫描入口复现两次约 5 秒的缺失 HAL 等待。按 OS17 当前 OplusOptimizeRUSHelper.needOptimizeForCamera(String) 重新定位能力判断，保留 HAL 存在时的原分支，不迁移 OS16 偏移或扩大 SELinux 权限。回读、重启及用户确认预览很快出现通过；原相机也有预览帧。仅 QQ 已验收，未推广到微信/支付宝；小布黑屏是[另一条 CameraX 链](os17-scanner-camera2.md)。

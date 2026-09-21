@@ -51,3 +51,13 @@ dev37 候选相对已验证基线只改变 system/framework/oplus-services.jar �
 保留新版基线其它 DEX，仅合入原已审计的 ADB 接收器缺失回退。安装器使用 PackageInstaller8T 路径。深色 app label 对比不足时，Android textColorPrimary/Secondary 实验仍继承浅色值，已撤回；改为从同一 COUI dialog context 取得 couiColorPrimaryNeutral/couiColorSecondNeutral 的 ColorStateList，回收 TypedArray。不叠加旧配色实验、不改变事务检查。
 
 最终 5,513 类语义往返、分区内容/元数据/读回通过。实机新装、更新、卸载、取消以及浅深色截图通过；ADB 新装/更新通过，未签名负例被拒且原版本保留。先前同事务模型的卸载取消、UI 降级拒绝、不可信来源提示另有验证。预览页不替代系统实际事务；独立 Contacts preInflate 异常未被该补丁处理。发布状态以当前状态页为准。
+
+## dev59r2 后台安装卡片
+
+实际安装阶段 stage 4 加入原生 COUIPanelBarView，支持下拉和卡片外点击；短拖动回弹。收起调用 Activity.moveTaskToBack(true)，保留 Session、ViewModel 和结果处理，不调用 cancel/dismiss/finish/abandon。确认阶段仍需用户确认，不把后台安装变成无提示安装。
+
+原 S2 入口可能早于 Fragment attach；预览通过后，真实安装曾因提前 requireContext 崩溃。修订为 Dialog 非空时读取 Dialog 自身上下文。只在实际事务中验收，不能用独立预览代替。
+
+空白处收起后新装完成有时间线证据。真实更新下拉可收起并返回结果页，但该轮更新已在收起动画结束前完成，不能说更新全程在后台；两次过快下拉没有赶上安装，不计成功。前台更新、取消保留旧版本、ADB 更新另有实测，测试应用均已移除。
+
+设备实际 system_ext 与发布候选不一致时，刷入前哈希检查阻止了错误基线；应基于实际设备重建。extract.erofs 会跳过已存在文件，每轮 source/roundtrip 使用独立目录，禁止旧回读目录造成假通过。保持原分区时间戳和标签。该修订已刷入重启，未合入完整 ZIP；不承诺强停进程或重启后恢复原安装界面。

@@ -28,13 +28,13 @@ TWRP无法解密Data并不授权Format Data；普通双清与清空内部存储�
 
 ## 当前交付与版本 bump
 
-20260921 NoRoot r1 汇总至 dev55，包含 TWRP-14-OP8T-Color597-V2.3-data-media-fix，默认 Enforcing。准确 ZIP 身份及未验收范围见[当前状态](os17-current-status.md)。保留 OS16 的环境/底层检查与双语 UI；当前包要求 Super ≥10,737,418,240 字节（10 GiB），支持更大的已扩容物理分区，不自动扩 GPT。
+20260921 NoRoot r1 汇总至 dev55，后续同版本已换入 TWRP-3.7.1_12-Kebab-Color597-V2.3-SIGPIPE-fix-r1-20260921，并更新 MOD 主页链接，默认 Enforcing。准确 ZIP 身份及未验收范围见[当前状态](os17-current-status.md)。保留 OS16 的环境/底层检查与双语 UI；当前包要求 Super ≥10,737,418,240 字节（10 GiB），支持更大的已扩容物理分区，不自动扩 GPT。
 
 当前打包检查：冻结 15 分区路径/大小/哈希；lpmake 后还原稀疏 extent 逐分区哈希；分片后检查 A/B 共 12 份主备元数据且数据 extents 一致；ZIP 34 载荷哈希及所有条目 CRC；boot 与已安装 NoRoot Enforcing 版本相同；recovery 确实入包；最后复制 NAS 并回读 SHA。仅验证 sparse 结构不能代替 payload 内容校验。
 
 包写 Super 与当前槽位的启动/恢复镜像；不保留另一槽位的旧系统逻辑布局。不附带基带等底层固件，要求匹配的官方 Android 14 底层。无自动清 Data、无自动重启；普通双清和 Format Data 的授权仍需区分。Format Data 后内部存储的 ZIP 也会消失，应预先安排外部存储或重新传入。
 
-日期更新只改 my_manifest/build.prop 的 ro.build.display.id 与 ro.build.display.id.show，保留 OTA身份、fingerprint、协议版本、原分区时间策略；同时更新包名、manifest、环境检测日期和交付说明。20260921 相比 20260920 r2 只有该分区哈希变化，其余14分区及启动配套不变。回解逐文件和 inode/标签对比，不以 ZIP 改名当作系统版本更新。
+日期更新只改 my_manifest/build.prop 的 ro.build.display.id 与 ro.build.display.id.show，保留 OTA身份、fingerprint、协议版本、原分区时间策略；同时更新包名、manifest、环境检测日期和交付说明。最初日期 bump 相比 20260920 r2 只改该分区；后续同版本另有 recovery 和主页 URL 更新，不能继续沿用初始哈希清单。回解逐文件和 inode/标签对比，不以 ZIP 改名当作系统版本更新。
 
 新包校验及 NAS 回读完成后，才按用户明确要求删除旧成品。删除范围限定为旧发布目录和本地旧 ZIP/校验文件，保留后续构建依赖及审计；不要把存储迁移导致的工作树删除提交成源码删除。大体积数据放用户指定工作盘/NAS，Windows Python 显式 UTF-8，TEMP/TMP 指向该工作区。
 

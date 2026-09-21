@@ -42,13 +42,15 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 此分支为PLK110供体在8T上的开发验证，不代表所有硬件或正式发布验收。保留上面的通用工作流，遇到下列问题再读取对应资料：
 
 | 场景 | 参考 |
+|---|---|
+| 热点启动即关闭、dnsmasq 退出 127 | [spawn 与旧内核](references/os17-hotspot.md) |
+| OS17 小布黑屏、更新覆盖 APK 修复 | [CameraX 与未验收系统候选](references/os17-scanner-camera2.md) |
 | 无线辅助服务回调空指针、protected Parcel 错误 | [Binder V4 协议对齐](references/os17-radio-callback.md) |
 | 隔空接听开关有效但无识别、AIBoost 加载或 NPU 崩溃 | [Camera2、ABI 与 CPU 后端](references/os17-air-gesture.md) |
 | 闪充瓦数、状态栏蓝色图标门槛 | [OS17 充电展示](references/os17-charge-display.md) |
 | 相册/游戏助手 APK 存在但未注册 | [Overlay 与原生扫描](references/os17-product-scan.md) |
 | 晕动舒缓没有圆点、300% 音量能力 | [运动传感器与音量](references/os17-motion-volume.md) |
 | 原生安装器、COUI 风格、ADB 回退或 OPEX 重启 | [候选与已撤回实验](references/os17-native-installer.md) |
-|---|---|
 | 酷安实况 Surface 切换失败、相册点击编辑退出 | [媒体兼容](references/os17-media-compat.md)：保留原生错误与回退，分别验收播放器和编辑器 |
 | 默认强制模式、MOD SELinux 切换、状态误显示 | [SELinux 与 MOD](references/os17-selinux-mod.md)：精确标签、受限属性、真实内核状态 |
 | 无线回调空指针、隔空接听、GPU 崩溃、输入法/来电振动 | [运行时兼容](references/os17-runtime-compat.md)：协议/ABI/能力声明与实际场景 |
