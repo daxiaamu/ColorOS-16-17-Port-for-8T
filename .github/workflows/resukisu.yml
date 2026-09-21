@@ -15,6 +15,7 @@ jobs:
           java-version: '17'
       - uses: android-actions/setup-android@v3
         with:
+          packages: platform-tools
           log-accepted-android-sdk-licenses: false
       - name: Install pinned kernel toolchain
         run: |
@@ -49,3 +50,4 @@ jobs:
           name: dev82-kernel
           path: kernel-output/
           if-no-files-found: error
+
