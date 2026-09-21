@@ -1,16 +1,16 @@
 # ColorOS 17 当前状态与验收边界
 
-资料更新至 dev62（2026-09-21），已发布完整包仍为 20260921 NoRoot r1；后继增量不等于已进入该包。供体 PLK110_11.C.61 / ColorOS 17.0.0.100(SP09CN01)，目标 OnePlus 8T KB2000、已验证的 4.19 内核与 Android 14 硬件底层。供体文件分析不授权操作供体手机。
+资料更新至 dev67 整理完成（2026-09-21）。供体 PLK110_11.C.61 / ColorOS 17.0.0.100(SP09CN01)，目标 OnePlus 8T KB2000、4.19 内核与 Android 14 硬件底层。供体文件分析不授权操作供体手机。
 
 ## 区分设备、镜像与完整包
 
 | 层级 | 当前证据 | 验收边界 |
 |---|---|---|
-| 历史 dev24 | TWRP 完整安装、授权 Format Data 后首次启动 | 历史开发 boot 为 permissive/含 ROOT 基线，不是当前发布策略 |
-| 当前开发设备 | dev57 QQ、dev58 分身、dev59r2 后台安装器、dev61r2 热点、dev62 图标分别刷入与分项验收；Enforcing、ADB Root 已关闭 | 沿用调试 boot，不能称当前设备 NoRoot；dev60 系统侧扫一扫未刷入，完整 ZIP 未合入上述增量 |
-| 20260921 NoRoot r1 | 汇总至 dev55，后续同版本换入 SIGPIPE 修订 TWRP 和 MOD 主页 URL；显示日期为 20260921；15 分区内容、34 ZIP 载荷哈希、全部条目 CRC、A/B 元数据和 NAS 副本校验通过 | 新 ZIP 双清和 B 槽实机刷入待验收；未自动刷入手机 |
+| 当前开发设备 | dev64 系统侧扫一扫，dev65 原生相机 JPEG 修复已重启验证；QQ 预览、前后摄拍照及第三方拍照 Intent 已回归 | 独立调试 boot，不是 NoRoot；dev67 已恢复原版预装分区并完整读回，重启后扫一扫/前后摄拍照回归通过；ADB Root 关闭 |
+| 已交付 20260920.2 NoRoot | 包含原版扫一扫预装、dev64 系统修复、后台安装器、热点、MOD 图标及新版 TWRP；15 分区与 ZIP 校验通过 | 该旧 ZIP 不含 dev65 JPEG 权限修复；未完成本包双清及 B 槽实机验收 |
+| dev67 干净合版 | 显式固定发布镜像，合入已验收 dev65 vendor；新参数构建入口已完成 34 载荷、CRC、12 份元数据及脚本语法验证 | 候选已生成，未替换共享交付目录；未做整包双清/B 槽验收；不含尚在调查的 OS14 震感调整 |
 
-系统显示 `KB2000_17.0.0.100_PORT_DEV01_daxiaamu_20260921`。完整包 `ColorOS17.0.0-port-kebab-20260921-NoRoot-r1-twrp.zip`，10,388,108,501 字节；SHA256 `6e273c2223e0f6a900cf9e367aad8f7494d8252b55a184723d9d0e814b3aabe9`。本技能仓库不包含 ROM 二进制。20260920 NoRoot r2 发布文件已按用户要求删除，历史构建输入与审计保留。
+已交付旧 ZIP：`ColorOS17.0.0-port-kebab-20260920.2-NoRoot-twrp.zip`，10,386,269,564 字节，SHA256 `0a255634e8a09ed0cb7cbd37eee872f40130284f7747693b975c8e6385ab7357`。dev67 保留 20260920.2 显示版本，必须用哈希区分新旧整包。本仓库不含 ROM 二进制。
 
 ## 已固化且有证据的功能
 
@@ -25,14 +25,15 @@
 - dev55 酷安 16.6.2 实况大图硬件 HEVC 播放及两轮退出重进完整播放通过，见[媒体兼容](os17-media-compat.md)。
 - dev54 默认 Enforcing 与持久 MOD 兼容模式切换通过；当时交付基线 Enforcing、无 su、保留 USB 调试；后续调试设备状态见上表。策略是有限适配，不能称完全未改官方策略，见[SELinux](os17-selinux-mod.md)。
 
-## dev57–dev62 后继增量
+## dev57–dev65 后继修复
 
 - [QQ 相机](thirdparty-camera-startup.md)：两次缺失 HAL 同步等待消除，用户确认正常预览。
 - [新建分身](clone-storage-groups.md)：OS17 复现后重定位媒体附加组刷新，新用户无需重启可从桌面打开。
 - [后台安装器](os17-native-installer.md)：收起保留安装事务，真实安装/取消与 UI 生命周期分别验收。
 - [热点](os17-hotspot.md)：扫描、WPA3 连接、DHCP、DNS、开关复测通过；外网上网未完成验收。
 - [MOD 图标](os17-apps-settings.md)：透明底 OS17 风格，浅深色与入口通过。
-- [小布扫一扫](os17-scanner-camera2.md)：APK 对照修复会被更新覆盖；系统侧 dev60 只有离线校验。当前恢复原版 APK 作对照，不能声称黑屏已由系统修好。后续重建须保留最新热点等修复。
+- [小布扫一扫](os17-scanner-camera2.md)：dev64 已在最新系统基线上验证原版 APK 预览，保留热点修复。旧 dev58 APK 实验不应合入发布镜像。
+- [原生相机拍照](os17-camera-jpeg-policy.md)：dev65 补齐 JPEG 服务调用链权限，Enforcing 下前后摄与第三方调用通过。
 
 ## 不得扩大结论
 
@@ -48,3 +49,9 @@ dev36 IMS HIDL 修复后用户确认通话正常；后续观察到双 SIM LOADED
 - dev45 相机既有功能入口有实测；dev51 仅补齐图片编辑验收，不推广至相册实况慢动作编辑。
 - dev46 闪充展示有 ART、颜色能力与普通 USB 反例证据；65W 动画/颜色与充满实体过渡仍缺本轮闭环，见[闪充](os17-charge-display.md)。
 - dev47 游戏助手曾完成包注册和后台进程验证，指定游戏中的侧栏/工具未获得此轮新证据；见[产品分区扫描](os17-product-scan.md)。视频通话美颜旧候选未获得合入验收证据。
+
+## dev67 新整合候选及后续发现
+
+新同版本候选大小 10,386,269,533 字节，SHA256 `d53dafd2370ce55484ff211f7f040f84dbdee49c0192279c31653eac55b7cdc2`。含 dev65 JPEG 修复；安装器、环境检查器、NoRoot boot 和 TWRP 与前一完整包逐字节相同。旧交付 ZIP 与新候选不可只按相同文件名区分。
+
+用户随后反馈屏幕色彩模式无效，已通过三种模式切换复现：设置 301/303/307 变化而显示底层持续 Native，并有未知 RenderIntent 回退日志。该问题尚未修复，见[色彩模式](os17-display-color.md)；本候选不宣称包含此修复。

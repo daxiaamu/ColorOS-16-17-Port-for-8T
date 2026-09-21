@@ -44,7 +44,8 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 | 场景 | 参考 |
 |---|---|
 | 热点启动即关闭、dnsmasq 退出 127 | [spawn 与旧内核](references/os17-hotspot.md) |
-| OS17 小布黑屏、更新覆盖 APK 修复 | [CameraX 与未验收系统候选](references/os17-scanner-camera2.md) |
+| 原生相机预览正常、按快门退出 | [旧 JPEG HAL 权限](references/os17-camera-jpeg-policy.md) |
+| OS17 小布黑屏、更新覆盖 APK 修复 | [CameraX 与系统侧兼容](references/os17-scanner-camera2.md) |
 | 无线辅助服务回调空指针、protected Parcel 错误 | [Binder V4 协议对齐](references/os17-radio-callback.md) |
 | 隔空接听开关有效但无识别、AIBoost 加载或 NPU 崩溃 | [Camera2、ABI 与 CPU 后端](references/os17-air-gesture.md) |
 | 闪充瓦数、状态栏蓝色图标门槛 | [OS17 充电展示](references/os17-charge-display.md) |
