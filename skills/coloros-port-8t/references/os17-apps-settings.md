@@ -66,8 +66,13 @@ Gesture 中虽有背壳敲击引用，目标 com.oplus.cupid / oplus.cupid.inten
 
 真实组件为 com.google.android.gms/.nearby.sharing.SharingTileService；原生添加、点击进入设置、删除后目录仍可见、重加与重启保持通过。未实测真实文件传输，不能与用户确认可用的一加互传混为一项。
 
-## dev62 MOD 入口图标
+## dev62/63 MOD 入口图标
 
-OS16 遗留的蓝圆底白滑杆与 OS17 透明底彩色图标不一致。仅替换 [AdvancedIcon 绘制类](../assets/AdvancedIcon.java)：保留原 32dp 布局槽位，绘制 22dp 宽的双色蓝滑杆，圆角轨道和实心调节钮，没有背景或依赖白色卡片的填充，正确传递 Drawable alpha/ColorFilter。
+OS16 遗留的蓝圆底白滑杆与 OS17 透明底彩色图标不一致。仅替换 [AdvancedIcon 绘制类](../assets/AdvancedIcon.java)：最终使用原生 24dp 布局槽位，绘制 22dp 宽的双色蓝滑杆，圆角轨道和实心调节钮，没有背景或依赖白色卡片的填充，正确传递 Drawable alpha/ColorFilter。
 
 以实机 APK 为输入，不以同版本号的发布包替代。57 个辅助类回读只变一个图标类，APK 只改 classes15.dex；system_ext 其余内容及元数据一致。已刷入并重启，浅/深色截图均人工检查，MOD 入口正常，恢复原浅色设置；功能与版本号不变，未合入完整包。输入 APK SHA256 2bc6d04c77a160451968904c6289213a4b5708463821c2df2929a8cf12f8a7cd，输出 a8272f9fbdbeea7e05a34ac2db24772cb08851591faf1adb43f872f84505d292。
+
+
+dev62 仅目视检查而未量化对齐，沿用 32dp intrinsic size 导致 wrap_content 图标宽96px，原生24dp为72px：图形中心右偏12px、标题右偏24px。dev63 同时将 intrinsic size 与 viewport 改24dp、内部坐标减4，保持图形可见大小，不能只平移图案而留下文字偏移。浅/深色实测 ImageView 横向边界均96..168，MOD/WLAN/蓝牙可见中心131.5px，标题起点216px，入口正常。
+
+量化时同时检查控件边界、图形可见像素与文字起点。uiautomator dump 返回 null root 后可能残留旧 XML；先删除旧文件并检查工具结果，不能把旧树与新截图拼成一份有效样本。dev63 输出 APK SHA256 24bc6c58a4b26c1626aaf338f69fcaf7a6e64c75cae9e4272e3c1f52a4eb8d70，已刷入，未合入完整 ZIP。
