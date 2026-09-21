@@ -1,70 +1,22 @@
-name: ReSukiSU for OnePlus 8T
+name: Binder async UX compatibility candidate
 on:
   workflow_dispatch:
-  push:
-    branches: [ReSukiSU-ColorOS16]
-    paths:
-      - '.github/workflows/resukisu.yml'
-      - 'resukisu/**'
 permissions:
   contents: read
-concurrency:
-  group: resukisu-${{ github.ref }}
-  cancel-in-progress: true
 jobs:
-  metadata:
-    runs-on: ubuntu-22.04
-    outputs:
-      prefix: ${{ steps.names.outputs.prefix }}
-      build_date: ${{ steps.names.outputs.build_date }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-      - uses: android-actions/setup-android@v3
-        with:
-          packages: platform-tools build-tools;36.0.0
-          log-accepted-android-sdk-licenses: false
-      - name: Test official build selection guards
-        run: |
-          python3 resukisu/test_official_manager.py
-          python3 resukisu/test_rom_profiles.py
-      - id: names
-        name: Resolve and verify latest official main-branch manager
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 resukisu/fetch_official_manager.py --latest
-      - uses: actions/upload-artifact@v4
-        with:
-          name: resolved-resukisu-inputs
-          path: resolved-inputs/
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.names.outputs.prefix }}_official-manager-APK
-          path: manager-output/
-          if-no-files-found: error
   kernel:
-    needs: metadata
     runs-on: ubuntu-22.04
     timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: resolved-resukisu-inputs
-          path: resukisu
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: '17'
       - uses: android-actions/setup-android@v3
         with:
-          packages: platform-tools build-tools;36.0.0
           log-accepted-android-sdk-licenses: false
-      - name: Install kernel toolchain
+      - name: Install pinned kernel toolchain
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y build-essential flex bison bc libssl-dev libelf-dev python3 cpio rsync binutils-aarch64-linux-gnu ccache
@@ -74,80 +26,26 @@ jobs:
           path: ~/.cache/ccache
           key: kernel-ccache-${{ hashFiles('resukisu/sources.json') }}-${{ github.run_id }}
           restore-keys: kernel-ccache-${{ hashFiles('resukisu/sources.json') }}-
-      - name: Test kebab fixes and build official 4.19 kernel with ReSukiSU
-        run: bash resukisu/build_kernel.sh
+      - name: Build candidate with existing device fixes
+        run: |
+          bash resukisu/build_kernel.sh
+          grep -qx 'CONFIG_OPLUS_BINDER_ASYNC_UX_COMPAT=y' kernel-output/kernel.config
+          aarch64-linux-gnu-nm build/out/vmlinux > build/symbols.txt
+          grep ' binder_async_ux_boost$' build/symbols.txt
+          grep ' binder_async_ux_release$' build/symbols.txt
       - name: Verify OEM module certificate and vendor ABI
         run: python3 resukisu/verify_vendor_compatibility.py kernel-output/Image kernel-output/Module.symvers --report build/vendor-compatibility.json
-      - uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: ~/.cache/ccache
-          key: kernel-ccache-${{ hashFiles('resukisu/sources.json') }}-${{ github.run_id }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: kernel-build-logs
+          name: dev82-build-logs
           path: |
             build/*.log
-            build/vendor-compatibility.json
-            build/kebab-regression.json
-            build/kebab-compile.json
+            build/*.json
             build/out/.config
           include-hidden-files: true
       - uses: actions/upload-artifact@v4
         with:
-          name: kernel
+          name: dev82-kernel
           path: kernel-output/
           if-no-files-found: error
-  package:
-    needs: [metadata, kernel]
-    strategy:
-      fail-fast: false
-      matrix:
-        rom: [ColorOS16, ColorOS17]
-    env:
-      RESUKISU_BUILD_DATE: ${{ needs.metadata.outputs.build_date }}
-    runs-on: ubuntu-22.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          name: resolved-resukisu-inputs
-          path: resukisu
-      - uses: actions/download-artifact@v4
-        with:
-          name: kernel
-          path: kernel-output
-      - name: Repack ReSukiSU boot once and create TWRP ZIP
-        run: python3 resukisu/package.py --rom ${{ matrix.rom }}
-      - name: Test installer guards without accessing devices
-        run: |
-          python3 resukisu/test_installer.py
-          python3 resukisu/test_boot_compatibility.py
-          python3 resukisu/test_rom_profiles.py
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ needs.metadata.outputs.prefix }}_${{ matrix.rom }}_kebab_boot-img
-          path: dist/${{ matrix.rom }}/*_kebab_boot.img
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ needs.metadata.outputs.prefix }}_${{ matrix.rom }}_kebab_TWRP
-          path: |
-            dist/${{ matrix.rom }}/*_kebab_TWRP.zip
-            dist/${{ matrix.rom }}/*.json
-            dist/${{ matrix.rom }}/*.txt
-            dist/${{ matrix.rom }}/*.md
-          if-no-files-found: error
-  verify-products:
-    needs: [metadata, kernel, package]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-      - name: Verify both ROM products and official manager together
-        run: python3 resukisu/publish_dual_release.py artifacts --verify-only

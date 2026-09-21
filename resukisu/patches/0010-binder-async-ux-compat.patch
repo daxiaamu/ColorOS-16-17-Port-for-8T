@@ -1,0 +1,374 @@
+--- /dev/null
++++ b/drivers/android/binder_async_ux.c
+@@ -0,0 +1,219 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/* Kebab async Binder UX compatibility: enqueue hints only, no queue reordering. */
++#include <linux/capability.h>
++#include <linux/compat.h>
++#include <linux/cred.h>
++#include <linux/hashtable.h>
++#include <linux/init.h>
++#include <linux/proc_fs.h>
++#include <linux/seq_file.h>
++#include <linux/sched/signal.h>
++#include <linux/sched_assist/sched_assist_common.h>
++#include <linux/slab.h>
++#include <linux/uaccess.h>
++#include <trace/events/sched.h>
++#include "binder_alloc.h"
++#include "binder_async_ux.h"
++
++#define UX_HINT_IOCTL 0x407a6900U /* Vendor userspace passes two signed 32-bit words. */
++#define UX_HINT_LIMIT 1024
++struct ux_hint {
++ struct hlist_node node;
++ struct task_struct *task;
++};
++static DEFINE_HASHTABLE(hints, 8);
++static DEFINE_HASHTABLE(owners, 8);
++static DEFINE_SPINLOCK(ux_lock);
++static unsigned int hint_count, owner_count;
++static atomic64_t accepted = ATOMIC64_INIT(0);
++static atomic64_t boosted = ATOMIC64_INIT(0);
++static atomic64_t released = ATOMIC64_INIT(0);
++
++static struct ux_hint *find_hint(struct task_struct *task)
++{
++ struct ux_hint *h;
++ hash_for_each_possible(hints, h, node, (unsigned long)task)
++  if (h->task == task) return h;
++ return NULL;
++}
++
++static int set_hint(int pid, int flag)
++{
++ struct task_struct *task;
++ struct ux_hint *entry = NULL, *old;
++ unsigned long irqflags;
++ int ret = 0;
++ /* Insertion/reordering (2) is deliberately unsupported; never fake success. */
++ if (flag == 2) return -EOPNOTSUPP;
++ if (flag < 0 || flag > 2 || pid == 0 || pid < -1) return -EINVAL;
++ rcu_read_lock();
++ task = pid == -1 ? current : find_task_by_vpid(pid);
++ if (task) get_task_struct(task);
++ rcu_read_unlock();
++ if (!task) return -ESRCH;
++ if (!uid_eq(current_euid(), task_euid(task)) && !capable(CAP_SYS_NICE)) {
++  ret = -EPERM; goto out;
++ }
++ if (flag) {
++  entry = kzalloc(sizeof(*entry), GFP_KERNEL);
++  if (!entry) { ret = -ENOMEM; goto out; }
++ }
++ spin_lock_irqsave(&ux_lock, irqflags);
++ old = find_hint(task);
++ if (task->flags & PF_EXITING) {
++  ret = -ESRCH;
++ } else if (flag && !old) {
++  if (hint_count >= UX_HINT_LIMIT) ret = -ENOSPC;
++  else {
++   entry->task = task;
++   get_task_struct(task);
++   hash_add(hints, &entry->node, (unsigned long)task);
++   hint_count++;
++   entry = NULL;
++  }
++ } else if (!flag && old) {
++  hash_del(&old->node);
++  hint_count--;
++  entry = old;
++ }
++ spin_unlock_irqrestore(&ux_lock, irqflags);
++ if (!ret) atomic64_inc(&accepted);
++ if (entry) {
++  if (entry->task) put_task_struct(entry->task);
++  kfree(entry);
++ }
++out:
++ put_task_struct(task);
++ return ret;
++}
++
++static void hint_task_exit(void *unused, struct task_struct *task)
++{
++ struct ux_hint *h;
++ unsigned long flags;
++ spin_lock_irqsave(&ux_lock, flags);
++ h = find_hint(task);
++ if (h) { hash_del(&h->node); hint_count--; }
++ spin_unlock_irqrestore(&ux_lock, flags);
++ if (h) { put_task_struct(h->task); kfree(h); }
++}
++
++bool binder_async_ux_requested(void)
++{
++ unsigned long flags;
++ bool enabled;
++ spin_lock_irqsave(&ux_lock, flags);
++ enabled = find_hint(current) != NULL;
++ spin_unlock_irqrestore(&ux_lock, flags);
++ return enabled;
++}
++
++void binder_async_ux_boost(struct binder_buffer *buffer, struct task_struct *task)
++{
++ struct binder_buffer *owner;
++ unsigned long flags;
++ if (!buffer || !task || !READ_ONCE(sysctl_sched_assist_enabled)) return;
++ spin_lock_irqsave(&ux_lock, flags);
++ if (buffer->async_ux_task || (task->flags & PF_EXITING)) goto out;
++ /* One outstanding owner per task, including after the stock UX timeout.
++  * This prevents a late buffer free from removing a newer UX generation. */
++ hash_for_each_possible(owners, owner, async_ux_node, (unsigned long)task)
++  if (owner->async_ux_task == task) goto out;
++ /* Never replace explicit UX or another subsystem's inherited state. */
++ if (get_ux_state_type(task) != UX_STATE_NONE) goto out;
++ set_inherit_ux(task, INHERIT_UX_BINDER_ASYNC, 0, SA_TYPE_HEAVY);
++ if (!test_inherit_ux(task, INHERIT_UX_BINDER_ASYNC)) goto out;
++ get_task_struct(task);
++ buffer->async_ux_task = task;
++ hash_add(owners, &buffer->async_ux_node, (unsigned long)task);
++ owner_count++;
++ atomic64_inc(&boosted);
++out:
++ spin_unlock_irqrestore(&ux_lock, flags);
++}
++
++void binder_async_ux_release(struct binder_buffer *buffer)
++{
++ struct task_struct *task;
++ unsigned long flags;
++ spin_lock_irqsave(&ux_lock, flags);
++ task = buffer->async_ux_task;
++ if (task) {
++  /* The stock 64-ms expiry may already have reset inheritance. */
++  unset_inherit_ux(task, INHERIT_UX_BINDER_ASYNC);
++  hash_del(&buffer->async_ux_node);
++  buffer->async_ux_task = NULL;
++  owner_count--;
++  atomic64_inc(&released);
++ }
++ spin_unlock_irqrestore(&ux_lock, flags);
++ if (task) put_task_struct(task);
++}
++
++static ssize_t hint_write(struct file *f, const char __user *buf, size_t n, loff_t *off)
++{
++ char text[48], op, extra;
++ int pid, flag, ret;
++ if (!n || n >= sizeof(text)) return -EINVAL;
++ if (copy_from_user(text, buf, n)) return -EFAULT;
++ text[n] = '\0';
++ if (sscanf(text, " %c %d %d %c", &op, &pid, &flag, &extra) != 3 || op != 'p')
++  return -EINVAL;
++ ret = set_hint(pid, flag);
++ return ret ? ret : n;
++}
++
++static long hint_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
++{
++ int words[2];
++ if (cmd != UX_HINT_IOCTL) return -ENOTTY;
++ if (copy_from_user(words, (void __user *)arg, sizeof(words))) return -EFAULT;
++ return set_hint(words[0], words[1]);
++}
++#ifdef CONFIG_COMPAT
++static long hint_compat_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
++{
++ return hint_ioctl(f, cmd, (unsigned long)compat_ptr(arg));
++}
++#endif
++static int hint_show(struct seq_file *m, void *unused)
++{
++ unsigned long flags;
++ unsigned int h, o;
++ spin_lock_irqsave(&ux_lock, flags);
++ h = hint_count; o = owner_count;
++ spin_unlock_irqrestore(&ux_lock, flags);
++ seq_printf(m, "supported_flags=0,1 hints=%u owners=%u accepted=%lld boosted=%lld released=%lld\n",
++  h, o, atomic64_read(&accepted), atomic64_read(&boosted),
++  atomic64_read(&released));
++ return 0;
++}
++static int hint_open(struct inode *inode, struct file *file)
++{
++ return single_open(file, hint_show, NULL);
++}
++static const struct file_operations hint_ops = {
++ .open = hint_open, .read = seq_read, .write = hint_write,
++ .llseek = seq_lseek, .release = single_release,
++ .unlocked_ioctl = hint_ioctl,
++#ifdef CONFIG_COMPAT
++ .compat_ioctl = hint_compat_ioctl,
++#endif
++};
++static int __init binder_async_ux_init(void)
++{
++ struct proc_dir_entry *dir;
++ int ret = register_trace_sched_process_exit(hint_task_exit, NULL);
++ if (ret) return ret;
++ dir = proc_mkdir("oplus_binder", NULL);
++ if (!dir) { ret = -ENOMEM; goto fail; }
++ if (!proc_create("ux_flag", 0666, dir, &hint_ops)) {
++  remove_proc_entry("oplus_binder", NULL);
++  ret = -ENOMEM; goto fail;
++ }
++ return 0;
++fail:
++ unregister_trace_sched_process_exit(hint_task_exit, NULL);
++ return ret;
++}
++late_initcall(binder_async_ux_init);
+--- /dev/null
++++ b/drivers/android/binder_async_ux.h
+@@ -0,0 +1,16 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++#ifndef _BINDER_ASYNC_UX_H
++#define _BINDER_ASYNC_UX_H
++#include <linux/types.h>
++struct task_struct;
++struct binder_buffer;
++#ifdef CONFIG_OPLUS_BINDER_ASYNC_UX_COMPAT
++bool binder_async_ux_requested(void);
++void binder_async_ux_boost(struct binder_buffer *, struct task_struct *);
++void binder_async_ux_release(struct binder_buffer *);
++#else
++static inline bool binder_async_ux_requested(void) { return false; }
++static inline void binder_async_ux_boost(struct binder_buffer *b, struct task_struct *t) {}
++static inline void binder_async_ux_release(struct binder_buffer *b) {}
++#endif
++#endif
+--- a/drivers/android/binder.c
++++ b/drivers/android/binder.c
+@@ -76,10 +76,11 @@
+ #include <uapi/linux/sched/types.h>
+ 
+ #include <asm/cacheflush.h>
+ 
+ #include "binder_alloc.h"
++#include "binder_async_ux.h"
+ #include "binder_internal.h"
+ #include "binder_trace.h"
+ 
+ #ifdef CONFIG_OPLUS_FEATURE_FRAME_BOOST
+ #include "../../include/linux/tuning/frame_group.h"
+@@ -675,10 +676,11 @@
+ 	unsigned int	code;
+ 	unsigned int	flags;
+ 	struct binder_priority	priority;
+ 	struct binder_priority	saved_priority;
+ 	bool    set_priority_called;
++	bool    async_ux_requested;
+ 	kuid_t	sender_euid;
+ 	binder_uintptr_t security_ctx;
+ 	/**
+ 	 * @lock:  protects @from, @to_proc, and @to_thread
+ 	 *
+@@ -3371,10 +3373,12 @@
+ 		if (sysctl_sched_assist_enabled) {
+ 			if (!oneway || proc->proc_type)
+ 				binder_set_inherit_ux(thread->task, current);
+ 		}
+ #endif /* OPLUS_FEATURE_SCHED_ASSIST */
++		if (oneway && t->async_ux_requested)
++			binder_async_ux_boost(t->buffer, thread->task);
+ 	} else if (!pending_async) {
+ #if defined(CONFIG_OPLUS_FEATURE_BINDER_STATS_ENABLE)
+ 		if (NULL != proc && NULL != proc->tsk) {
+ 			binder_notify_obj.binder_task = proc->tsk;
+ 			call_binderevent_notifiers(0, (void *)&binder_notify_obj);
+@@ -3747,10 +3751,12 @@
+ 	t->sender_euid = proc->cred->euid;
+ 	t->to_proc = target_proc;
+ 	t->to_thread = target_thread;
+ 	t->code = tr->code;
+ 	t->flags = tr->flags;
++	t->async_ux_requested = !reply && (tr->flags & TF_ONE_WAY) &&
++		binder_async_ux_requested();
+ 	if (!(t->flags & TF_ONE_WAY) &&
+ 	    binder_supported_policy(current->policy)) {
+ 		/* Inherit supported policies for synchronous transactions */
+ 		t->priority.sched_policy = current->policy;
+ 		t->priority.prio = current->normal_prio;
+@@ -5140,10 +5146,12 @@
+ 
+ 			return -EFAULT;
+ 		}
+ 		ptr += trsize;
+ 
++		if ((t->flags & TF_ONE_WAY) && t->async_ux_requested)
++			binder_async_ux_boost(t->buffer, current);
+ 		trace_binder_transaction_received(t);
+ #ifdef CONFIG_SCHED_WALT
+ 		if (current->low_latency)
+ 			current->low_latency = false;
+ #endif
+--- a/drivers/android/binder_alloc.c
++++ b/drivers/android/binder_alloc.c
+@@ -30,10 +30,11 @@
+ #include <linux/ratelimit.h>
+ #include <asm/cacheflush.h>
+ #include <linux/uaccess.h>
+ #include <linux/highmem.h>
+ #include "binder_alloc.h"
++#include "binder_async_ux.h"
+ #include "binder_trace.h"
+ #ifdef OPLUS_FEATURE_HANS_FREEZE
+ #include <linux/hans.h>
+ #endif /*OPLUS_FEATURE_HANS_FREEZE*/
+ 
+@@ -691,10 +692,11 @@
+ 		      alloc->pid, buffer, size, buffer_size);
+ 
+ 	BUG_ON(buffer->free);
+ 	BUG_ON(size > buffer_size);
+ 	BUG_ON(buffer->transaction != NULL);
++	binder_async_ux_release(buffer);
+ 	BUG_ON(buffer->user_data < alloc->buffer);
+ 	BUG_ON(buffer->user_data > alloc->buffer + alloc->buffer_size);
+ 
+ 	if (buffer->async_transaction) {
+ 		alloc->free_async_space += size + sizeof(struct binder_buffer);
+--- a/drivers/android/binder_alloc.h
++++ b/drivers/android/binder_alloc.h
+@@ -60,10 +60,14 @@
+ 	size_t data_size;
+ 	size_t offsets_size;
+ 	size_t extra_buffers_size;
+ 	void __user *user_data;
+ 	int    pid;
++#ifdef CONFIG_OPLUS_BINDER_ASYNC_UX_COMPAT
++	struct task_struct *async_ux_task;
++	struct hlist_node async_ux_node;
++#endif
+ };
+ 
+ /**
+  * struct binder_lru_page - page object used for binder shrinker
+  * @page_ptr: pointer to physical page in mmap'd space
+--- a/drivers/android/Makefile
++++ b/drivers/android/Makefile
+@@ -1,5 +1,7 @@
+ ccflags-y += -I$(src)			# needed for trace events
+ 
+ obj-$(CONFIG_ANDROID_BINDERFS)		+= binderfs.o
+ obj-$(CONFIG_ANDROID_BINDER_IPC)	+= binder.o binder_alloc.o
+ obj-$(CONFIG_ANDROID_BINDER_IPC_SELFTEST) += binder_alloc_selftest.o
++
++obj-$(CONFIG_OPLUS_BINDER_ASYNC_UX_COMPAT) += binder_async_ux.o
+--- a/drivers/android/Kconfig
++++ b/drivers/android/Kconfig
+@@ -60,5 +60,12 @@
+ 	help
+ 	  it helps to reduce anr by restricting background app binder behavior.
+ endif # if ANDROID
+ 
+ endmenu
++
++config OPLUS_BINDER_ASYNC_UX_COMPAT
++	bool "Kebab async Binder UX compatibility"
++	depends on ANDROID_BINDER_IPC=y && OPLUS_FEATURE_SCHED_ASSIST=y
++	default n
++	help
++	  Support enqueue-only vendor async UX hints with transaction ownership.

@@ -1,0 +1,73 @@
+--- a/vendor/oplus/kernel/oplus_performance/sched_assist/sched_assist_common.h
++++ b/vendor/oplus/kernel/oplus_performance/sched_assist/sched_assist_common.h
+@@ -100,10 +100,13 @@
+ 	INHERIT_UX_BINDER = 0,
+ 	INHERIT_UX_RWSEM,
+ 	INHERIT_UX_MUTEX,
+ 	INHERIT_UX_SEM,
+ 	INHERIT_UX_FUTEX,
++#ifdef CONFIG_OPLUS_BINDER_ASYNC_UX_COMPAT
++	INHERIT_UX_BINDER_ASYNC,
++#endif
+ 	INHERIT_UX_MAX,
+ };
+ enum ANMATION_TYPE
+ {
+ 	ANNIMATION_END = 0,
+--- a/vendor/oplus/kernel/oplus_performance/sched_assist/sched_assist_common.c
++++ b/vendor/oplus/kernel/oplus_performance/sched_assist/sched_assist_common.c
+@@ -1808,10 +1808,18 @@
+ 	if (task->sched_class != &fair_sched_class) {
+ 		task_rq_unlock(rq, task, &flags);
+ 		return;
+ 	}
+ 
++#ifdef CONFIG_OPLUS_BINDER_ASYNC_UX_COMPAT
++	/* Check under the same rq lock as state replacement. */
++	if (type == INHERIT_UX_BINDER_ASYNC &&
++	    get_ux_state_type(task) != UX_STATE_NONE) {
++		task_rq_unlock(rq, task, &flags);
++		return;
++	}
++#endif
+ 	inherit_ux_inc(task, type);
+ 	task->ux_depth = depth + 1;
+ 	old_state = task->ux_state;
+ 	new_state = (inherit_val & SCHED_ASSIST_UX_MASK) | SA_TYPE_INHERIT;
+ 	/* identify type like allocator ux, keep it, but can not inherit  */
+@@ -1894,19 +1902,35 @@
+ 		return;
+ 	}
+ 
+ 	rq = task_rq_lock(task, &flags);
+ 
++#ifdef CONFIG_OPLUS_BINDER_ASYNC_UX_COMPAT
++	/* Stock expiry can clear our contribution before the buffer is freed. */
++	if (type == INHERIT_UX_BINDER_ASYNC &&
++	    !test_inherit_ux(task, type)) {
++		task_rq_unlock(rq, task, &flags);
++		return;
++	}
++#endif
+ 	inherit_ux_sub(task, type, value);
+ 	inherit_ux = atomic64_read(&task->inherit_ux);
+ 	if (inherit_ux > 0) {
+ 		task_rq_unlock(rq, task, &flags);
+ 		return;
+ 	}
+ 	if (inherit_ux < 0) {
+ 		atomic64_set(&(task->inherit_ux), 0);
+ 	}
++#ifdef CONFIG_OPLUS_BINDER_ASYNC_UX_COMPAT
++	/* A later explicit UX assignment is not owned by this transaction. */
++	if (type == INHERIT_UX_BINDER_ASYNC &&
++	    !(task->ux_state & SA_TYPE_INHERIT)) {
++		task_rq_unlock(rq, task, &flags);
++		return;
++	}
++#endif
+ 	task->ux_depth = 0;
+ 	/* identify type like allocator ux, keep it, but can not inherit  */
+ 	ux_state = task->ux_state;
+ 	ux_state &= (SA_TYPE_ID_ALLOCATOR_SER | SA_TYPE_ID_CAMERA_PROVIDER);
+ 
