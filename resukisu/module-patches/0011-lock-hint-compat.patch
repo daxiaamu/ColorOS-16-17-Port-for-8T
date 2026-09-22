@@ -1,0 +1,204 @@
+--- a/vendor/oplus/kernel/oplus_performance/sched_assist/sched_assist_common.h
++++ b/vendor/oplus/kernel/oplus_performance/sched_assist/sched_assist_common.h
+@@ -100,10 +100,13 @@
+ 	INHERIT_UX_BINDER = 0,
+ 	INHERIT_UX_RWSEM,
+ 	INHERIT_UX_MUTEX,
+ 	INHERIT_UX_SEM,
+ 	INHERIT_UX_FUTEX,
++#ifdef CONFIG_OPLUS_LOCK_HINT_COMPAT
++	INHERIT_UX_LOCK_HINT,
++#endif
+ 	INHERIT_UX_MAX,
+ };
+ enum ANMATION_TYPE
+ {
+ 	ANNIMATION_END = 0,
+--- a/vendor/oplus/kernel/oplus_performance/sched_assist/sched_assist_common.c
++++ b/vendor/oplus/kernel/oplus_performance/sched_assist/sched_assist_common.c
+@@ -3,10 +3,12 @@
+  * Copyright (C) 2020 Oplus. All rights reserved.
+  */
+ 
+ 
+ #include <linux/sched.h>
++#include <linux/cred.h>
++#include <linux/module.h>
+ #include <linux/list.h>
+ #include <linux/jiffies.h>
+ #include <trace/events/sched.h>
+ #include <../kernel/sched/sched.h>
+ #include <linux/fs.h>
+@@ -1808,10 +1810,19 @@
+ 	if (task->sched_class != &fair_sched_class) {
+ 		task_rq_unlock(rq, task, &flags);
+ 		return;
+ 	}
+ 
++#ifdef CONFIG_OPLUS_LOCK_HINT_COMPAT
++	/* Lock hints must not replace an unrelated explicit/inherited UX owner. */
++	if (type == INHERIT_UX_LOCK_HINT &&
++	    (!sysctl_sched_assist_enabled ||
++	     get_ux_state_type(task) != UX_STATE_NONE)) {
++		task_rq_unlock(rq, task, &flags);
++		return;
++	}
++#endif
+ 	inherit_ux_inc(task, type);
+ 	task->ux_depth = depth + 1;
+ 	old_state = task->ux_state;
+ 	new_state = (inherit_val & SCHED_ASSIST_UX_MASK) | SA_TYPE_INHERIT;
+ 	/* identify type like allocator ux, keep it, but can not inherit  */
+@@ -1894,19 +1905,34 @@
+ 		return;
+ 	}
+ 
+ 	rq = task_rq_lock(task, &flags);
+ 
++#ifdef CONFIG_OPLUS_LOCK_HINT_COMPAT
++	/* Stock timeout may have consumed this reference already. */
++	if (type == INHERIT_UX_LOCK_HINT &&
++	    !test_inherit_ux(task, type)) {
++		task_rq_unlock(rq, task, &flags);
++		return;
++	}
++#endif
+ 	inherit_ux_sub(task, type, value);
+ 	inherit_ux = atomic64_read(&task->inherit_ux);
+ 	if (inherit_ux > 0) {
+ 		task_rq_unlock(rq, task, &flags);
+ 		return;
+ 	}
+ 	if (inherit_ux < 0) {
+ 		atomic64_set(&(task->inherit_ux), 0);
+ 	}
++#ifdef CONFIG_OPLUS_LOCK_HINT_COMPAT
++	/* A later explicit assignment belongs to its original caller. */
++	if (type == INHERIT_UX_LOCK_HINT && !(task->ux_state & SA_TYPE_INHERIT)) {
++		task_rq_unlock(rq, task, &flags);
++		return;
++	}
++#endif
+ 	task->ux_depth = 0;
+ 	/* identify type like allocator ux, keep it, but can not inherit  */
+ 	ux_state = task->ux_state;
+ 	ux_state &= (SA_TYPE_ID_ALLOCATOR_SER | SA_TYPE_ID_CAMERA_PROVIDER);
+ 
+@@ -2883,10 +2909,69 @@
+ 
+ #define OPLUS_SCHEDULER_PROC_DIR	"oplus_scheduler"
+ #define OPLUS_SCHEDASSIST_PROC_DIR	"sched_assist"
+ struct proc_dir_entry *d_oplus_scheduler = NULL;
+ struct proc_dir_entry *d_sched_assist = NULL;
++
++#ifdef CONFIG_OPLUS_LOCK_HINT_COMPAT
++/* Caller-local, outermost lock scope only.  No PID selection, nice or IM writes. */
++static atomic64_t lock_hint_accepted = ATOMIC64_INIT(0);
++static atomic64_t lock_hint_released = ATOMIC64_INIT(0);
++static atomic64_t lock_hint_refused = ATOMIC64_INIT(0);
++
++static ssize_t lock_hint_write(struct file *file, const char __user *buf,
++		size_t count, loff_t *ppos)
++{
++	char command[2], comm[TASK_COMM_LEN];
++	bool root = uid_eq(current_uid(), GLOBAL_ROOT_UID);
++
++	get_task_comm(comm, current->group_leader);
++	if (!root && (__kuid_val(current_uid()) != 1000 ||
++			strcmp(comm, "system_server")))
++		return -EPERM;
++	if (count != 1 && count != 2)
++		return -EINVAL;
++	if (copy_from_user(command, buf, count))
++		return -EFAULT;
++	if ((command[0] != '0' && command[0] != '1') ||
++	    (count == 2 && command[1] != '\n'))
++		return -EINVAL;
++	if (command[0] == '1') {
++		if (test_inherit_ux(current, INHERIT_UX_LOCK_HINT))
++			return -EALREADY;
++		set_inherit_ux(current, INHERIT_UX_LOCK_HINT, 0, SA_TYPE_LISTPICK);
++		if (!test_inherit_ux(current, INHERIT_UX_LOCK_HINT)) {
++			atomic64_inc(&lock_hint_refused);
++			return -EAGAIN;
++		}
++		atomic64_inc(&lock_hint_accepted);
++	} else {
++		unset_inherit_ux(current, INHERIT_UX_LOCK_HINT);
++		atomic64_inc(&lock_hint_released);
++	}
++	return count;
++}
++
++static ssize_t lock_hint_read(struct file *file, char __user *buf,
++		size_t count, loff_t *ppos)
++{
++	char status[192];
++	int len = scnprintf(status, sizeof(status),
++		"port8t_lock_hint_v1 accepted=%lld releases=%lld refused=%lld\n",
++		atomic64_read(&lock_hint_accepted), atomic64_read(&lock_hint_released),
++		atomic64_read(&lock_hint_refused));
++	return simple_read_from_buffer(buf, count, ppos, status, len);
++}
++
++static const struct file_operations lock_hint_fops = {
++	.owner = THIS_MODULE,
++	.read = lock_hint_read,
++	.write = lock_hint_write,
++	.llseek = default_llseek,
++};
++#endif
++
+ static int __init oplus_sched_assist_init(void)
+ {
+ 	struct proc_dir_entry *proc_node;
+ 
+ 	d_oplus_scheduler = proc_mkdir(OPLUS_SCHEDULER_PROC_DIR, NULL);
+@@ -2899,10 +2984,14 @@
+ 	if(!d_sched_assist) {
+ 		ux_err("failed to create proc dir sched_assist\n");
+ 		goto err_dir_sa;
+ 	}
+ 
++#ifdef CONFIG_OPLUS_LOCK_HINT_COMPAT
++	if (!proc_create("lock_hint", 0666, d_sched_assist, &lock_hint_fops))
++		pr_warn("lock_hint: proc interface unavailable\n");
++#endif
+ 	proc_node = proc_create("debug_enabled", 0666, d_sched_assist, &proc_debug_enabled_fops);
+ 	if (!proc_node) {
+ 		ux_err("failed to create proc node debug_enabled\n");
+ 		goto err_creat_debug_enabled;
+ 	}
+@@ -2982,10 +3071,16 @@
+ 	 * Note:
+ 	 * SS_LOCK_OWNER has lowest ux prio and lowest ux exectime. There maybe
+ 	 * many ss_lockers and we don't know if they really matter. Anyway,
+ 	 * there's no harm in being careful.
+ 	 */
++#ifdef CONFIG_OPLUS_LOCK_HINT_COMPAT
++	/* Same conservative 4ms budget as the stock system-server lock owner. */
++	if (test_inherit_ux(p, INHERIT_UX_LOCK_HINT) &&
++	    (ux_state & SCHED_ASSIST_UX_MASK) == SA_TYPE_LISTPICK)
++		return exec_limit;
++#endif
+ 	if ((p->ux_im_flag == IM_FLAG_SS_LOCK_OWNER) && (ux_state & SA_TYPE_LISTPICK))
+ 		return exec_limit;
+ 
+ 	if (sched_assist_scene(SA_LAUNCH) && !(ux_state & SA_TYPE_INHERIT)) {
+ 		exec_limit *= 25;
+--- a/vendor/oplus/kernel/oplus_performance/sched_assist/Kconfig
++++ b/vendor/oplus/kernel/oplus_performance/sched_assist/Kconfig
+@@ -103,5 +103,13 @@
+ 	tristate "cpufreq_iowait"
+ 	default n
+ 	depends on OPLUS_FEATURE_EAS_OPT
+ 	help
+ 	  ensure iowait decay not happen too quickly
++
++config OPLUS_LOCK_HINT_COMPAT
++	bool "Kebab caller-local lock hint compatibility"
++	depends on OPLUS_FEATURE_SCHED_ASSIST=y && OPLUS_FEATURE_SCHED_UX_PRIORITY
++	default n
++	help
++	  Supply a scoped, separate UX inheritance owner to system_server.
++	  Requires paired outermost enter/exit; stock UX expiry remains active.

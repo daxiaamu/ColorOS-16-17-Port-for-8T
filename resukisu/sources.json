@@ -4,15 +4,16 @@
   "modules_repo": "https://github.com/OnePlusOSS/android_kernel_modules_and_devicetree_oneplus_sm8250.git",
   "modules_commit": "0a301570ef70f6f9bfe1840451c9d41f5ddce6b8",
   "resukisu_repo": "https://github.com/ReSukiSU/ReSukiSU.git",
-  "resukisu_commit": "052ca27775cc9c8570e3b1ba3db7c29486d6020e",
+  "resukisu_commit": "6d18926ae6eeb571a04c1ce7552c324d606fa9d8",
   "base_boot_url": "https://github.com/daxiaamu/ColorOS-16-17-Port-for-8T/releases/download/resukisu-inputs-v1/ColorOS16-8T-base-boot.img.gz",
   "base_boot_sha256": "3f06497bfa6d31d4f7209246a224090e207eaec23b0d769a376d318894be76b7",
   "base_boot_gz_sha256": "b5819290c4ac99f39a49c9c4124d529503664d7caf5950008256173e131b5085",
   "boot_partition_bytes": 100663296,
   "kernel_ndk": "21.4.7075529",
   "manager_ndk": "29.0.14206865",
-  "official_manager_run_id": 34628711668,
+  "official_manager_run_id": 35437762110,
   "official_manager_artifact": "Manager-release",
-  "official_manager_apk": "ReSukiSU_v4.2.0-rc1_35134-arm64-v8a-release.apk",
-  "official_manager_sha256": "04dfe68cdce7d1284f52f4953ffde9403f03243804fde56a5b739d920b230d82"
+  "official_manager_apk": "ReSukiSU_v4.2.0-rc2_35158-arm64-v8a-release.apk",
+  "official_manager_sha256": "970d836ead88446f0fc674bee5efa5c4626f49b126e1276745ac875ccf040b0a",
+  "official_manager_artifact_id": 10582977486
 }

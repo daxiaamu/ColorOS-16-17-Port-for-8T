@@ -70,7 +70,7 @@ p=K/'scripts/gcc-wrapper.py'; t=p.read_text()
 t=t.replace('print "error, forbidden warning:", m.group(2)','print("error, forbidden warning:", m.group(2))').replace('print line,','print(line, end="")').replace("print args[0] + ':',e.strerror","print(args[0] + ':',e.strerror)").replace("print 'Is your PATH set correctly?'","print('Is your PATH set correctly?')").replace("print ' '.join(args), str(e)","print(' '.join(args), str(e))").replace('stderr=subprocess.PIPE)','stderr=subprocess.PIPE, universal_newlines=True)')
 p.write_text(t)
 (W/'out').mkdir(); shutil.copyfile(R/'stock.config',W/'out/.config')
-run(str(K/'scripts/config'),'--file',str(W/'out/.config'),'-e','KSU','-e','KSU_MANUAL_HOOK','-d','KSU_TRACEPOINT_HOOK','-e','KSU_MANUAL_HOOK_AUTO_SETUID_HOOK','-e','KSU_MANUAL_HOOK_AUTO_INITRC_HOOK','-e','KSU_MANUAL_HOOK_AUTO_INPUT_HOOK','-e','KSU_MULTI_MANAGER_SUPPORT','-d','KSU_SUSFS','-d','KSU_DEBUG')
+run(str(K/'scripts/config'),'--file',str(W/'out/.config'),'-e','KSU','-e','KSU_MANUAL_HOOK','-d','KSU_TRACEPOINT_HOOK','-e','KSU_MANUAL_HOOK_AUTO_SETUID_HOOK','-e','KSU_MANUAL_HOOK_AUTO_INITRC_HOOK','-e','KSU_MANUAL_HOOK_AUTO_INPUT_HOOK','-e','KSU_MULTI_MANAGER_SUPPORT','-d','KSU_SUSFS','-d','KSU_DEBUG','-e','OPLUS_LOCK_HINT_COMPAT')
 # Trust the OEM public certificate used by the ROM's existing vendor modules.
 shutil.copyfile(R/'kebab-stock-module-cert.pem',K/'certs/kebab-stock-module-cert.pem')
 run(str(K/'scripts/config'),'--file',str(W/'out/.config'),'--set-str','SYSTEM_TRUSTED_KEYS','certs/kebab-stock-module-cert.pem')
