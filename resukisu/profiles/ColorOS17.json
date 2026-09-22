@@ -1,10 +1,10 @@
 {
   "schema": 1,
   "rom": "ColorOS17",
-  "baseline": "ColorOS17.0.0-port-kebab-20260921-NoRoot-r1",
+  "baseline": "ColorOS17.0.0-port-kebab-20260923-NoRoot",
   "boots": [
     {
-      "name": "ColorOS17.0.0-port-kebab-20260921-NoRoot-r1 boot (same as 20260920 NoRoot r2)",
+      "name": "ColorOS17.0.0-port-kebab-20260923-NoRoot boot (identical to 20260921 NoRoot r1 and 20260920 NoRoot r2)",
       "sha256": "d8ee22c0ea67dace2214e502327652d97162d4f5817bcb4819318cd55da323f6",
       "bytes": 100663296,
       "preserved_components": {
@@ -13,5 +13,11 @@
         "ramdisk.cpio": "f7bb618e0dfb7eaafb20f6f0d410867652591efd95e7848d1c2fee1cb6137ece"
       }
     }
-  ]
+  ],
+  "rom_package": {
+    "filename": "ColorOS17.0.0-port-kebab-20260923-NoRoot-twrp.zip",
+    "bytes": 10386490672,
+    "sha256": "fd89895585e1e39dd340d1c6437e16656a2338f95b4599755ab9f57df0098a94",
+    "boot_entry": "images/boot.img"
+  }
 }

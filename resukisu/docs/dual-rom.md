@@ -4,7 +4,7 @@
 
 ColorOS16：原公开boot `3f06497bfa6d31d4f7209246a224090e207eaec23b0d769a376d318894be76b7` 和20260916 ROM boot `bdd8967199778d244d908e1adc8b5a85e614fdbd47db59df642ad0c7b29a0751`。
 
-ColorOS17：20260921 NoRoot r1 boot `d8ee22c0ea67dace2214e502327652d97162d4f5817bcb4819318cd55da323f6`，与20260920 NoRoot r2相同。实际发布输入解包后，ramdisk.cpio、DTB、header与公开boot一致；压缩大小不同不等于内容不同。OS17内核配置与既有构建配置的差异符合关闭KSU后的结果，没有新增调度配置差异。
+ColorOS17：20260923 NoRoot boot `d8ee22c0ea67dace2214e502327652d97162d4f5817bcb4819318cd55da323f6`，与20260921 NoRoot r1及20260920 NoRoot r2相同。20260922直接读取20260923正式ROM ZIP中的images/boot.img复核，哈希未变。本次ROM侧dev81、dev90、dev91更新不引入新的内核补丁，已撤回的dev88/dev89实验不合入。实际发布输入解包后，ramdisk.cpio、DTB、header与公开boot一致；压缩大小不同不等于内容不同。OS17内核配置与既有构建配置的差异符合关闭KSU后的结果，没有新增调度配置差异。
 
 因此使用原已授权公开的干净boot换入共享内核，无需公开新的完整OS17输入。保持Enforcing默认启动参数及现有ROM侧策略。内核保留模块证书、网络ABI、S3908单击和1815触感兼容，并将旧v6显示补丁替换为后继本轮入场状态累计补丁：仅直接入场的panel允许相应NOLP跳过，失败重试保留状态，退出成功清理。默认先OFF路径保持原NOLP行为。
 

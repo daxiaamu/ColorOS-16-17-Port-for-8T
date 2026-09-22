@@ -21,7 +21,8 @@ jobs:
       BUILD_RUN: ${{ inputs.run_id }}
       RELEASE_TAG: ${{ inputs.release_tag }}
     steps:
-      - name: Verify successful source build and draft target
+      - id: source
+        name: Verify successful source build and draft target
         run: |
           python3 - <<'PY'
           import json,os,subprocess
@@ -33,12 +34,15 @@ jobs:
           releases=api('releases?per_page=100')
           release=next(r for r in releases if r['tag_name']==os.environ['RELEASE_TAG'])
           assert release['draft'] and release['target_commitish']==run['head_sha']
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out: out.write('sha='+run['head_sha']+'\n')
           PY
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.source.outputs.sha }}
       - uses: actions/download-artifact@v4
         with:
           run-id: ${{ inputs.run_id }}
           github-token: ${{ github.token }}
           path: artifacts
-      - uses: actions/checkout@v4
       - name: Verify both ROM packages and upload five finished assets to draft
         run: python3 resukisu/publish_dual_release.py artifacts

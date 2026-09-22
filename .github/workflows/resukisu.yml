@@ -119,6 +119,19 @@ jobs:
         with:
           name: kernel
           path: kernel-output
+      - name: Record reviewed ROM baseline
+        env:
+          ROM_PROFILE: ${{ matrix.rom }}
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          profile=json.loads(Path('resukisu/profiles',os.environ['ROM_PROFILE']+'.json').read_text())
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as out:
+              out.write('ROM baseline: '+profile['baseline']+'\n')
+              for boot in profile['boots']:
+                  out.write('\nAccepted input boot SHA256: `'+boot['sha256']+'`\n')
+          PY
       - name: Repack ReSukiSU boot once and create TWRP ZIP
         run: python3 resukisu/package.py --rom ${{ matrix.rom }}
       - name: Test installer guards without accessing devices
