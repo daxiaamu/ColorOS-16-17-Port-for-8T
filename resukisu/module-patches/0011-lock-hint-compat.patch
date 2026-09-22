@@ -84,7 +84,73 @@
  	ux_state = task->ux_state;
  	ux_state &= (SA_TYPE_ID_ALLOCATOR_SER | SA_TYPE_ID_CAMERA_PROVIDER);
  
-@@ -2883,10 +2909,69 @@
+@@ -2238,10 +2264,17 @@
+ 	struct task_struct *task;
+ 	char buffer[PROC_NUMBUF];
+ 	int err, ux_state;
+ #if IS_ENABLED(CONFIG_OPLUS_FEATURE_SCHED_UX_PRIORITY)
+ 	int ux_orig;
++#ifdef CONFIG_OPLUS_LOCK_HINT_COMPAT
++	struct rq_flags hint_flags;
++	struct rq *hint_rq;
++	const bool setter_needs_lock = false;
++#else
++	const bool setter_needs_lock = true;
++#endif
+ #endif
+ 
+ 	memset(buffer, 0, sizeof(buffer));
+ 
+ 	if (count > sizeof(buffer) - 1)
+@@ -2263,25 +2296,42 @@
+ 		put_task_struct(task);
+ 		return -EINVAL;
+ 	}
+ 
+ #if IS_ENABLED(CONFIG_OPLUS_FEATURE_SCHED_UX_PRIORITY)
++#ifdef CONFIG_OPLUS_LOCK_HINT_COMPAT
++	hint_rq = task_rq_lock(task, &hint_flags);
++#endif
+ 	ux_orig = task->ux_state;
++#ifdef CONFIG_OPLUS_LOCK_HINT_COMPAT
++	/* Explicit ownership must not retain our temporary inherited marker. */
++	if (test_inherit_ux(task, INHERIT_UX_LOCK_HINT) &&
++	    (ux_state == SA_OPT_CLEAR || (ux_state & (SA_OPT_SET | SA_TYPE_LISTPICK)))) {
++		inherit_ux_sub(task, INHERIT_UX_LOCK_HINT, 1);
++		if (!atomic64_read(&task->inherit_ux) && (ux_orig & SA_TYPE_INHERIT)) {
++			ux_orig &= ~(SA_TYPE_INHERIT | SA_TYPE_LISTPICK);
++			task->ux_depth = 0;
++		}
++	}
++#endif
+ 	if (ux_state == SA_OPT_CLEAR) { /* clear all ux type but animator type */
+ 		/* NOTE: keep animator and specific ux type */
+ 		ux_orig &= (SA_TYPE_ANIMATOR | SA_TYPE_ID_ALLOCATOR_SER | SA_TYPE_ID_CAMERA_PROVIDER);
+-		oplus_set_ux_state_lock(task, ux_orig, true);
++		oplus_set_ux_state_lock(task, ux_orig, setter_needs_lock);
+ 	} else if (ux_state & SA_OPT_SET) { /* set target ux type and clear set opt */
+ 		if (ux_state & SA_OPT_SET_PRIORITY) {
+ 			ux_orig &= ~(SCHED_ASSIST_UX_PRIORITY_MASK);
+ 		}
+ 		ux_orig |= ux_state & ~(SA_OPT_SET|SA_OPT_SET_PRIORITY);
+-		oplus_set_ux_state_lock(task, ux_orig, true);
+-	} else if (ux_orig & ux_state) { /* reset target ux type */
++		oplus_set_ux_state_lock(task, ux_orig, setter_needs_lock);
++	} else if ((ux_orig & ux_state) || ux_orig != task->ux_state) { /* reset target ux type */
+ 		ux_orig &= ~ux_state;
+-		oplus_set_ux_state_lock(task, ux_orig, true);
+-	}
++		oplus_set_ux_state_lock(task, ux_orig, setter_needs_lock);
++	}
++#ifdef CONFIG_OPLUS_LOCK_HINT_COMPAT
++	task_rq_unlock(hint_rq, task, &hint_flags);
++#endif
+ #else
+ 	/* remove priority bit of ux state on kernel 5.4 */
+ 	ux_state &= (0x00FFFDFF);
+ 	if (ux_state == SA_OPT_CLEAR) { /* clear all ux type but animator */
+ 		task->ux_state &= ~(SA_TYPE_LISTPICK | SA_TYPE_HEAVY | SA_TYPE_LIGHT);
+@@ -2883,10 +2933,69 @@
  
  #define OPLUS_SCHEDULER_PROC_DIR	"oplus_scheduler"
  #define OPLUS_SCHEDASSIST_PROC_DIR	"sched_assist"
@@ -154,7 +220,7 @@
  	struct proc_dir_entry *proc_node;
  
  	d_oplus_scheduler = proc_mkdir(OPLUS_SCHEDULER_PROC_DIR, NULL);
-@@ -2899,10 +2984,14 @@
+@@ -2899,10 +3008,14 @@
  	if(!d_sched_assist) {
  		ux_err("failed to create proc dir sched_assist\n");
  		goto err_dir_sa;
@@ -169,7 +235,7 @@
  		ux_err("failed to create proc node debug_enabled\n");
  		goto err_creat_debug_enabled;
  	}
-@@ -2982,10 +3071,16 @@
+@@ -2982,10 +3095,16 @@
  	 * Note:
  	 * SS_LOCK_OWNER has lowest ux prio and lowest ux exectime. There maybe
  	 * many ss_lockers and we don't know if they really matter. Anyway,

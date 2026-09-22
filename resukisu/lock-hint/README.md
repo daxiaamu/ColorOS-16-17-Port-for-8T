@@ -7,3 +7,7 @@ The Android 17 native lock hint cannot map its device on the Kebab kernel. This 
 Framework integration calls `Port8tLockHint.hint(enable, originalResult)` immediately after `nativeLockBoostHint(enable)` and returns the original result unchanged. The existing AOSP nice fallback therefore remains active. Per-thread state pairs nested scopes and only releases a successfully acquired contribution. No synthetic `/dev/sched_boost` or successful native return is created.
 
 This branch starts from the previously verified kernel build base; the unaccepted dev82 asynchronous Binder experiment is not included. Required gates: kernel compilation, OEM certificate/vendor CRC verification, temporary-boot enforcement, real enter/exit and expiry observation, framework DEX/hidden-API audit, repeated thermally matched rapid launch/home tests. Do not infer success merely from counters or absent errors.
+
+## dev88 revision 2
+
+The first device probe demonstrated real 0 -> 0x108 -> 0 lock UX and balanced repeated scopes. It also exposed a failed edge case: the old proc setter ORs explicit bits into the inherited marker, so a later lock release could clear newly explicit UX. Revision 2 retires only the lock-hint contribution while holding the same rq lock as an explicit proc write. It preserves unrelated reference counts, handles same-bit takeover, and keeps all changes within the original candidate patch. Host checks using extracted candidate functions pass; new full kernel build and device checks are still required.
