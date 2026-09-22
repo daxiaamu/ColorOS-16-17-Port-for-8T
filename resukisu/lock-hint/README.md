@@ -11,3 +11,7 @@ This branch starts from the previously verified kernel build base; the unaccepte
 ## dev88 revision 2
 
 The first device probe demonstrated real 0 -> 0x108 -> 0 lock UX and balanced repeated scopes. It also exposed a failed edge case: the old proc setter ORs explicit bits into the inherited marker, so a later lock release could clear newly explicit UX. Revision 2 retires only the lock-hint contribution while holding the same rq lock as an explicit proc write. It preserves unrelated reference counts, handles same-bit takeover, and keeps all changes within the original candidate patch. Host checks using extracted candidate functions pass; new full kernel build and device checks are still required.
+
+## dev88 revision 3
+
+The animation-thread integration probe exposed another ownership boundary: an explicit clear of SA_TYPE_INHERIT could leave the candidate LISTPICK bit behind. A caller-local probe reproduced the exact 0x108 -> 0x8 -> 0x8 sequence on revision 2. Include inherited-marker clears in the existing atomic proc ownership handoff; do not add a separate cleanup workaround. Host tests now also cover this case. The exact system writer and revision 3 runtime result remain to be verified; revision 2 is not a release candidate.

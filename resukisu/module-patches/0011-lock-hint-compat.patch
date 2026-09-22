@@ -115,7 +115,7 @@
 +#ifdef CONFIG_OPLUS_LOCK_HINT_COMPAT
 +	/* Explicit ownership must not retain our temporary inherited marker. */
 +	if (test_inherit_ux(task, INHERIT_UX_LOCK_HINT) &&
-+	    (ux_state == SA_OPT_CLEAR || (ux_state & (SA_OPT_SET | SA_TYPE_LISTPICK)))) {
++	    (ux_state == SA_OPT_CLEAR || (ux_state & (SA_OPT_SET | SA_TYPE_LISTPICK | SA_TYPE_INHERIT)))) {
 +		inherit_ux_sub(task, INHERIT_UX_LOCK_HINT, 1);
 +		if (!atomic64_read(&task->inherit_ux) && (ux_orig & SA_TYPE_INHERIT)) {
 +			ux_orig &= ~(SA_TYPE_INHERIT | SA_TYPE_LISTPICK);
