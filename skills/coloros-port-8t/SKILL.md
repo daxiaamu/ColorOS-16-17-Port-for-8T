@@ -91,3 +91,5 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 ## 交付
 
 按“已固化且已验证 / 临时实验 / 未解决 / 已撤回”交代结果。资料公开只导出审阅过的说明、原创补丁/脚本和必要哈希，不上传原始工作区或设备数据。ColorOS 17 采用相同诊断方法，但需重新审核每个接口、feature、APEX 和字节码补丁；不直接套用 OS16 偏移和方法体。
+
+待机耗电、重复原生服务退出及无线ADB测量干扰，阅读[OS17待机服务](references/os17-standby-services.md)。镜像修复、设备Global设置、长期功耗验收分别记录。

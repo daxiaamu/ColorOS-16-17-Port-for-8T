@@ -1,9 +1,19 @@
-# OS17 屏幕色彩模式无效（已复现，尚未修复）
+# OS17 屏幕色彩模式：WCG 版本声明与旧显示栈
 
-原生 UI 依次切换自然、鲜明、标准，系统 display_color_mode 对应 303、307、301，secure oplus_customize_color_mode 对应 11、12、10。设置与框架观察者均有响应，但 SurfaceFlinger/HWC/SDM 始终为 Native、render intent 0。
+## 已定位的根因
 
-同一切换窗口出现 `map unknown (DCI-P3 sRGB Full range)/(Unknown RenderIntent) to default color mode`。这比仅凭截图或设置值变化更能定位兼容失败：供体模式/渲染意图与旧显示栈协商不匹配。尚未确定应修哪一层映射，不能直接把 301 等枚举写到面板 seed 节点。
+PLK110 供体的 `my_product/etc/permissions/oplus.product.display_system_features.xml` 声明 `oplus.software.display.wcg_2.0_support`。框架因此使用自定义模式10/11/12，对应 render intent 301/303/307；8T OS14 显示栈不提供这些模式。原先切换设置虽然变值，SurfaceFlinger 输出 Unknown RenderIntent 并回退 Native。
 
-当前显示栈支持 NATIVE、SRGB、DISPLAY_P3，SDM 有 adapt_P3、adapt_sRGB、cinema_P3 等配置。应对照原厂模式映射，保留正常 HDR/色彩管理、色温及护眼状态。测试前护眼处于开启；本轮未改变护眼设置，完成后恢复原选中的标准模式。截图无法证明实体色域变化。
+8T 原厂 my_product 不声明 WCG2。撤回这一条声明并重启 Android 框架后，框架与显示服务重选原生旧版本分支，原生设置可以驱动真实模式切换。单独在旧进程里写旧设置编号不足以验证：旧显示服务仍保留先前的能力状态，需重启后再测。
 
-此项是在 dev67 整包离线校验后发现，新合版尚不含修复。后续修复需确认三档真实下发不同的受支持模式，再验证色温/护眼/HDR 共存及实体屏表现。
+## 最小修复与验证
+
+仅撤回上述 WCG2 声明，保留其余文件与现有原厂校准属性，不改 APK、显示二进制或内核，不关闭全局广色域支持。
+
+临时加载后，原生页面提供“标准”“自然”两档：标准对应自定义模式1、display_color_mode=256、SDM sRGB_V1；自然对应模式0、display_color_mode=0、SDM vivid_V1。供体 WCG2 三档不应继续假装为旧硬件支持的原样模式。
+
+护眼关闭时，两档CCT分别6527/7542，驱动模式不同；护眼开启时均保持用户原CCT4296，驱动仍切换到各自模式。测试后恢复标准和原护眼开启状态。影院258与鲜艳259的底层旧模式也能切换，但本候选未额外开放专业模式入口。
+
+镜像相对dev69逐文件、权限、属主、SELinux标签审计通过，只改变这一份XML，保留24个大小写冲突路径与左侧音量属性。重启后持久验收另记于当前状态。截图不能证明实体色彩，实体观感需用户反馈；HDR视频播放未专项验收。完整卡刷包尚未重新构建。
+
+持久状态：dev70 已单分区刷入并完整回读验证，整机重启后撤回的声明仍缺省、临时挂载不存在，原生两档的SDM回读仍正确。测试后关闭ADB Root，维持Enforcing。实体观感反馈待收，完整ZIP尚未更新。
