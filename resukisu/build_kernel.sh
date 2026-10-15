@@ -36,7 +36,19 @@ python3 - <<'PY'
 from pathlib import Path
 p=Path('kernel-output/Image'); b=p.read_bytes()
 assert len(b)>8*1024*1024 and b[56:60]==b'ARM\x64', 'Not an arm64 Image'
-assert b'BakaSU' in b, 'BakaSU is missing from kernel'
+import subprocess,json,re
+source=Path('build/src/kernel/msm/KernelSU')
+def git(*args): return subprocess.check_output(['git','-C',str(source),*args],text=True).strip()
+lock=json.loads(Path('resukisu/sources.json').read_text())
+assert git('rev-parse','HEAD')==lock['resukisu_commit']
+code=int(git('rev-list','--count','HEAD'))+30700
+assert code==int(re.search(r'_(\d+)-arm64-v8a-release\.apk$',lock['official_manager_apk']).group(1))
+assert 'CONFIG_KSU_FULL_NAME_FORMAT="%TAG_NAME%-%COMMIT_SHA%"' in Path('kernel-output/kernel.config').read_text()
+dirty=subprocess.run(['git','-C',str(source),'diff-index','--quiet','HEAD']).returncode
+assert dirty in (0,1)
+full=git('describe','--abbrev=0','--tags')+'-'+git('rev-parse','--short=8','HEAD')+('-dirty' if dirty else '')
+assert full.encode() in b, 'Verified upstream version string missing from Image'
+
 release=Path('build/out/include/config/kernel.release').read_text().strip()
 assert release == '4.19.157-perf-daxiaamu+', release
 assert ('Linux version '+release+' ').encode() in b, 'Kernel release missing from Image'
@@ -44,9 +56,14 @@ Path('kernel-output/kernel-release.txt').write_text(release+'\n')
 import subprocess,json
 wanted={'_text','_end','__bss_start','__bss_stop','selinux_state'}
 symbols={}
+required_hooks={'ksu_handle_execveat','ksu_handle_faccessat','ksu_handle_stat','ksu_handle_sys_reboot'}
+linked_hooks=set()
 for line in subprocess.check_output(['aarch64-linux-gnu-nm','-n','build/out/vmlinux'],text=True).splitlines():
  fields=line.split()
+ if len(fields)==3 and fields[1] in ('t','T') and fields[2] in required_hooks: linked_hooks.add(fields[2])
  if len(fields)==3 and fields[2] in wanted: symbols[fields[2]]=int(fields[0],16)
+assert linked_hooks==required_hooks, ('Missing linked BakaSU hooks',required_hooks-linked_hooks)
+Path('kernel-output/bakasu-identity.json').write_text(json.dumps({'commit':lock['resukisu_commit'],'version_code':code,'version_string':full,'linked_hooks':sorted(linked_hooks)},indent=2)+'\n')
 assert symbols.keys()==wanted, symbols
 assert symbols['_text'] <= symbols['__bss_start'] <= symbols['selinux_state'] < symbols['__bss_stop'] <= symbols['_end'], symbols
 assert symbols['_end']-symbols['_text'] < 100663296, symbols
