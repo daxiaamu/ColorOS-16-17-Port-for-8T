@@ -42,10 +42,10 @@ verify=W/'verify'; verify.mkdir(); run('unpack','-h',p,cwd=verify)
 assert sha(verify/'kernel')==sha(Path('kernel-output/Image'))
 for name,digest in original.items(): assert sha(verify/name)==digest, f'Boot component changed: {name}'
 newsha=sha(p)
-manifest={'artifact_names':N,'rom':args.rom,'rom_baseline':profile['baseline'],'rom_profile':profile,'status':'compiled-and-offline-verified; NOT device-boot-tested','device':'OnePlus 8T KB2000 / project 19805','slot_policy':'current only; no slot switch','base_boot_sha256':S['base_boot_sha256'],'accepted_boot_sha256':accepted_hashes,'boot_sha256':newsha,'boot_bytes':p.stat().st_size,'preserved_components':original,'source_locks':S,'module_abi_runtime_validation':'pending','selinux':'original enforcing configuration retained','manager_support':'official ReSukiSU Actions/TG certificate; see manager-compatibility.json'}
+manifest={'artifact_names':N,'rom':args.rom,'rom_baseline':profile['baseline'],'rom_profile':profile,'status':'compiled-and-offline-verified; NOT device-boot-tested','device':'OnePlus 8T KB2000 / project 19805','slot_policy':'current only; no slot switch','base_boot_sha256':S['base_boot_sha256'],'accepted_boot_sha256':accepted_hashes,'boot_sha256':newsha,'boot_bytes':p.stat().st_size,'preserved_components':original,'source_locks':S,'module_abi_runtime_validation':'pending','selinux':'original enforcing configuration retained','manager_support':'official BakaSU/ReSukiSU Actions/TG certificate; see manager-compatibility.json'}
 (D/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 # The standalone download and ZIP payload share this single repacked image.
-script=(R/'update-binary').read_text().replace('@FROM_HASH@',accepted_hashes[0]).replace('@TO_HASH@',newsha).replace('@COMPATIBLE_HASHES@',' '.join(accepted_hashes[1:])).replace('@ROM_NAME@',args.rom)
+script=(R/'update-binary').read_text().replace('@FROM_HASH@',accepted_hashes[0]).replace('@TO_HASH@',newsha).replace('@COMPATIBLE_HASHES@',' '.join(accepted_hashes[1:])).replace('@ROM_NAME@',args.rom).replace('ReSukiSU for ',N['brand']+' for ')
 with zipfile.ZipFile(D/N['twrp'],'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
  entry=zipfile.ZipInfo('META-INF/com/google/android/update-binary'); entry.external_attr=0o100755<<16; z.writestr(entry,script)
  z.writestr('META-INF/com/google/android/updater-script','# Handled by update-binary\n')

@@ -7,7 +7,7 @@ from artifact_names import artifact_names
 class OfficialBuildTests(unittest.TestCase):
     def setUp(self):
         self.run={'name':'Build Manager','head_branch':'main','event':'push','status':'completed',
-                  'conclusion':'success','head_repository':{'full_name':'ReSukiSU/ReSukiSU'},
+                  'conclusion':'success','head_repository':{'full_name':'Baka-SU/BakaSU'},
                   'created_at':'2026-09-13T00:00:00Z','id':42}
     def test_exclude_untrusted_and_failed_runs(self):
         self.assertTrue(eligible(self.run))
@@ -45,6 +45,15 @@ class OfficialBuildTests(unittest.TestCase):
             self.assertEqual(result,p/name);self.assertEqual(result.read_bytes(),b'arm64')
             with zipfile.ZipFile(archive,'a') as z:z.writestr('duplicate/'+name,b'other')
             with self.assertRaises(AssertionError):extract_apk(archive,p)
+    def test_bakasu_names_and_apk(self):
+        name='BakaSU_v4.2.0_35200-arm64-v8a-release.apk'
+        names=artifact_names('20261015',sources={'official_manager_apk':name},rom='ColorOS17')
+        self.assertEqual(names['brand'],'BakaSU')
+        self.assertEqual(names['boot'],'BakaSU_v4.2.0_35200_20261015_ColorOS17_kebab_boot.img')
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);archive=p/'test.zip'
+            with zipfile.ZipFile(archive,'w') as z:z.writestr(name,b'arm64')
+            self.assertEqual(extract_apk(archive,p).name,name)
     def test_names_use_resolved_version(self):
         names=artifact_names('20260913',sources={'official_manager_apk':'ReSukiSU_v4.2.0-rc1_35137-arm64-v8a-release.apk'})
         self.assertEqual(names['prefix'],'ReSukiSU_v4.2.0-rc1_35137_20260913')

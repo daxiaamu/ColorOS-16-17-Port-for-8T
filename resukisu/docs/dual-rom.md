@@ -31,3 +31,7 @@ Release工具要求整个双版run成功，检查两份manifest、源码锁、�
 新增源码补丁 `0003-f2fs-umount-discard-timeout.patch`：在 DPOLICY_UMOUNT 分支显式设置 timeout=true，恢复 OF2FS 条件编译下原本被 else-if 截走的卸载超时。两版共用同一内核，OS16 同时得到该文件系统修复。保留后台 discard、加密及 OF2FS balance/performance 策略。编译前用实际官方函数的 C 回归测试比较所有政策字段，只允许 OF2FS 卸载超时这一项变化。未合入 1014/1015 AOD 实验。
 
 1012 完整 ROM 曾有黑屏、无 USB 反馈，事故原因未确定；本次 ReSukiSU 适配不代表事故已修复或整包已完成跨设备验证。本次未操作设备，新成品仅经过离线验证。
+
+## Official BakaSU migration
+
+The official repository redirects to Baka-SU/BakaSU. Latest main-branch builds now produce BakaSU APKs. Resolve only successful official main builds, retain the existing official certificate pin, and compile the exact APK source commit. Artifact branding follows the verified APK name. The repository branch and workflow filenames remain stable. Old ReSukiSU filename parsing remains for historical locks; new Actions use BakaSU.

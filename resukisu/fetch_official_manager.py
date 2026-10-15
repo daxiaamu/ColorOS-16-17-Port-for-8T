@@ -6,8 +6,8 @@ from urllib.parse import quote
 import argparse, hashlib, json, os, re, shutil, subprocess, zipfile
 from artifact_names import artifact_names
 
-REPO = 'ReSukiSU/ReSukiSU'
-APK_NAME = re.compile(r'ReSukiSU_(v[0-9][A-Za-z0-9.-]*)_([0-9]+)-arm64-v8a-release\.apk')
+REPO = 'Baka-SU/BakaSU'
+APK_NAME = re.compile(r'(?:ReSukiSU|BakaSU)_(v[0-9][A-Za-z0-9.-]*)_([0-9]+)-arm64-v8a-release\.apk')
 
 def api(path):
     return json.loads(subprocess.check_output(['gh', 'api', 'repos/'+REPO+'/'+path], text=True, timeout=60))
@@ -104,7 +104,7 @@ def main():
     apk_version = re.search(r"versionName='([^']+)'", badging).group(1)
     assert apk_version.lstrip('v') == version.lstrip('v'), 'APK versionName differs from filename'
     assert re.search(r"native-code:.*'arm64-v8a'", badging), 'APK missing arm64 native code'
-    sources.update(resukisu_commit=run['head_sha'], official_manager_run_id=run['id'],
+    sources.update(resukisu_repo='https://github.com/'+REPO+'.git', resukisu_commit=run['head_sha'], official_manager_run_id=run['id'],
                    official_manager_artifact='Manager-release', official_manager_artifact_id=artifact['id'],
                    official_manager_apk=apk.name, official_manager_sha256=digest)
     names = artifact_names(sources=sources)

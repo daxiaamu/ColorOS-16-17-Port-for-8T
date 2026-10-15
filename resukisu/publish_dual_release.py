@@ -37,7 +37,7 @@ def verify(root):
             assert hashlib.sha256(z.read('images/boot.img')).hexdigest()==sha(boot)
             installer=z.read('META-INF/com/google/android/update-binary').decode()
             expected="ACCEPTED_HASHES='"+manifest['accepted_boot_sha256'][0]+' '+' '.join(manifest['accepted_boot_sha256'][1:])+"'"
-            assert expected in installer and ('ReSukiSU for '+rom) in installer
+            assert expected in installer and (names['brand']+' for '+rom) in installer
         for line in (twrp.parent/'SHA256SUMS.txt').read_text().splitlines():
             digest,name=line.split('  ',1);assert Path(name).name==name
             assert sha(boot if name==boot.name else twrp.parent/name)==digest

@@ -36,7 +36,7 @@ python3 - <<'PY'
 from pathlib import Path
 p=Path('kernel-output/Image'); b=p.read_bytes()
 assert len(b)>8*1024*1024 and b[56:60]==b'ARM\x64', 'Not an arm64 Image'
-assert b'ReSukiSU' in b, 'ReSukiSU is missing from kernel'
+assert b'BakaSU' in b, 'BakaSU is missing from kernel'
 release=Path('build/out/include/config/kernel.release').read_text().strip()
 assert release == '4.19.157-perf-daxiaamu+', release
 assert ('Linux version '+release+' ').encode() in b, 'Kernel release missing from Image'
