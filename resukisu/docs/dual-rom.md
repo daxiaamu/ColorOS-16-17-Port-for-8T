@@ -23,3 +23,11 @@ Release工具要求整个双版run成功，检查两份manifest、源码锁、�
 不修改SystemUI、ROM策略、DTB、供电或分区布局。新ReSukiSU组合需分别实测16/17的启动、Root、模块、触摸、AOD默认/无缝模式、指纹与震动。旧无ROOT内核验收不代替新组合实测。
 
 本地源码、产物和临时文件使用F盘，并设置进程级TEMP/TMP、PYTHONDONTWRITEBYTECODE；Java另外设置java.io.tmpdir。GitHub托管Runner使用其自己的临时工作区。
+
+## 20261012 r2 适配（20261015）
+
+直接核对用户提供的 1012 r2 ZIP 内 boot，SHA256 为 `d618b0a241548e625fb0da249853d39c018ee946fd626796dfd62bf7b2d20497`，内核为 `6f4b19ed9f42d271705dffaeda2df50bb473e9d8c6cb722d790c8a64f9a3fc53`。ramdisk、DTB、header 与公开输入完全一致，继续复用公开输入，只将新哈希加入 OS17 已审查列表，保留旧版兼容。
+
+新增源码补丁 `0003-f2fs-umount-discard-timeout.patch`：在 DPOLICY_UMOUNT 分支显式设置 timeout=true，恢复 OF2FS 条件编译下原本被 else-if 截走的卸载超时。两版共用同一内核，OS16 同时得到该文件系统修复。保留后台 discard、加密及 OF2FS balance/performance 策略。编译前用实际官方函数的 C 回归测试比较所有政策字段，只允许 OF2FS 卸载超时这一项变化。未合入 1014/1015 AOD 实验。
+
+1012 完整 ROM 曾有黑屏、无 USB 反馈，事故原因未确定；本次 ReSukiSU 适配不代表事故已修复或整包已完成跨设备验证。本次未操作设备，新成品仅经过离线验证。

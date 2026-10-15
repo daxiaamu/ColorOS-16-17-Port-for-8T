@@ -2,6 +2,7 @@
 set -euo pipefail
 ROOT=$(pwd)
 python3 resukisu/prepare.py
+python3 resukisu/test_f2fs_discard_policy.py build/src/kernel/msm --report build/f2fs-regression.json
 python3 resukisu/test_s3908_gesture.py build/modules
 python3 resukisu/test_kebab_aod_haptics.py build/src/kernel/msm build/modules --report build/kebab-regression.json
 python3 resukisu/verify_manager_compatibility.py build/src/kernel/msm/KernelSU/kernel
@@ -23,7 +24,7 @@ make -k -j"$(nproc)" "${ARGS[@]}" Image 2>&1 | tee "$ROOT/build/kernel.log"
 cd "$ROOT"
 mkdir -p kernel-output
 python3 resukisu/verify_kebab_compile.py build/out --report build/kebab-compile.json
-cp build/kebab-regression.json build/kebab-compile.json kernel-output/
+cp build/kebab-regression.json build/kebab-compile.json build/f2fs-regression.json kernel-output/
 cp build/out/arch/arm64/boot/Image kernel-output/Image
 cp build/out/.config kernel-output/kernel.config
 cp build/out/Module.symvers kernel-output/

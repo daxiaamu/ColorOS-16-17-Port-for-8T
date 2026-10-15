@@ -90,6 +90,7 @@ jobs:
           path: |
             build/*.log
             build/vendor-compatibility.json
+            build/f2fs-regression.json
             build/kebab-regression.json
             build/kebab-compile.json
             build/out/.config

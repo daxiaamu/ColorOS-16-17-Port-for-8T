@@ -1,0 +1,28 @@
+From: daxiaamu ColorOS 17 8T port
+Subject: [PATCH] f2fs: retain unmount discard timeout with OF2FS enabled
+
+The OF2FS conditional introduces a new else-if before the upstream
+timeout assignment. With OF2FS enabled, DPOLICY_UMOUNT consequently
+retains the common timeout=false initialization. Restore the timeout
+in the unmount branch, leaving the OF2FS balance/performance behavior
+unchanged. Existing pending-discard cleanup remains responsible for
+dropping unissued work and waiting for submitted requests.
+
+Observed on the 8T OS17 first boot after fastboot -w: init spends hundreds
+of seconds in f2fs_put_super -> f2fs_issue_discard_timeout ->
+__issue_discard_cmd. Two independent SysRq-l CPU snapshots identify
+the same path. Keep encryption and normal mounted discard enabled.
+
+Base: OnePlusOSS/android_kernel_oneplus_sm8250
+Commit: 846e71f228ad605c75b53064c4c165a1361a0bfe
+
+--- a/fs/f2fs/segment.c
++++ b/fs/f2fs/segment.c
+@@ -1349,6 +1349,7 @@
+ 	} else if (discard_type == DPOLICY_UMOUNT) {
+ 		dpolicy->io_aware = false;
+ 		/* we need to issue all to keep CP_TRIMMED_FLAG */
+ 		dpolicy->granularity = 1;
++		dpolicy->timeout = true;
+ #ifdef CONFIG_OPLUS_FEATURE_OF2FS
+ 	} else if (discard_type == DPOLICY_BALANCE ||

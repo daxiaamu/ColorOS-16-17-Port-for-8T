@@ -16,7 +16,7 @@ class Profiles(unittest.TestCase):
             accepted.append(set(compatible_hashes(R/'profiles'/(profile['rom']+'.json'),parts,100663296)))
         self.assertTrue(accepted[0].isdisjoint(accepted[1]))
         self.assertIn('bdd8967199778d244d908e1adc8b5a85e614fdbd47db59df642ad0c7b29a0751',accepted[0])
-        self.assertEqual(accepted[1],{'d8ee22c0ea67dace2214e502327652d97162d4f5817bcb4819318cd55da323f6'})
+        self.assertEqual(accepted[1],{'d8ee22c0ea67dace2214e502327652d97162d4f5817bcb4819318cd55da323f6','d618b0a241548e625fb0da249853d39c018ee946fd626796dfd62bf7b2d20497'})
     def test_refuse_changed_base_component(self):
         path=R/'profiles/ColorOS17.json';parts=json.loads(path.read_text())['boots'][0]['preserved_components'];parts['ramdisk.cpio']='0'*64
         with self.assertRaises(AssertionError):compatible_hashes(path,parts,100663296)
