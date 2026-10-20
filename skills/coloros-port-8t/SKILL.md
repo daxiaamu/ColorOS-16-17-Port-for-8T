@@ -62,6 +62,7 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 | 第一屏、循环启动、显示硬重置、QSPM等待 | [APEX/旧内核/框架启动](references/os17-boot-framework.md) |
 | Super扩容要求、预装从userdata回迁、完整包验收 | [Super与交付](references/os17-super-release.md) |
 | MOD/关于、无线硬件声明、互传、20分身、主题目录 | [应用与原生设置](references/os17-apps-settings.md) |
+| 供体原版互传、CryptoEng 10045/10023、NFC 一碰无响应 | [HKDF、预置密钥与回退](references/os17-oshare-crypto-nfc.md)：双向传输已验证候选与未解决的 NFC 分开记录 |
 | 全景息屏黑屏、无缝时钟成功后失效 | [AOD与OneShot条件](references/os17-aod-clock.md) |
 | 语音崩溃循环、traced重启、动画长帧 | [OS17性能实测](references/os17-performance.md) |
 

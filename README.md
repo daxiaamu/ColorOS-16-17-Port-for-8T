@@ -2,7 +2,7 @@
 
 面向一加 8T 移植、调试与回归的 AI agent skill，由 **大侠阿木** 的实际移植记录整理。它提供决策方法、已验证案例、失败经验和离线校验工具，供后续移植工作复用。
 
-**本分支为 ColorOS-17：已增加 PLK110 ColorOS 17 → 一加8T的开发移植与实机诊断经验。** 当前已整理至 20260921 NoRoot r1：默认 Enforcing、MOD 模式切换及后继媒体/硬件修复有分项实测；新完整包离线与交付副本校验通过，双清与 B 槽实机验收仍待完成。这不是 ROM 下载仓库，也不是从原厂包一键生成全部修复的构建系统。
+**本分支为 ColorOS-17：已增加 PLK110 ColorOS 17 → 一加8T的开发移植与实机诊断经验。** 最新专项更新为 2026-10-21 的[原版互传与 NFC 兼容调查](skills/coloros-port-8t/references/os17-oshare-crypto-nfc.md)：原版互传双向传输候选已获用户确认，尚未进入发布包；NFC 一碰互联仍未解决。这不是 ROM 下载仓库，也不是从原厂包一键生成全部修复的构建系统。
 
 ## ColorOS 17 专项入口
 
@@ -10,7 +10,7 @@
 
 > 使用 $coloros-port-8t，先读OS17专项状态，根据已验证的PLK110→8T经验分析这份新供体；重新核对输入哈希、设备与内核，不直接重放旧偏移，也不把候选当成已刷入。
 
-资料现更新至 dev62：补充[热点旧内核兼容](skills/coloros-port-8t/references/os17-hotspot.md)、[小布 CameraX 与候选边界](skills/coloros-port-8t/references/os17-scanner-camera2.md)、后台安装器生命周期、OS17 分身回归及 MOD 图标改版。已发布完整包与开发机增量分别维护；系统侧扫一扫尚未刷入，热点外网上网尚未完成验收。
+专项资料还包括[热点旧内核兼容](skills/coloros-port-8t/references/os17-hotspot.md)、[小布 CameraX 与候选边界](skills/coloros-port-8t/references/os17-scanner-camera2.md)、后台安装器生命周期、OS17 分身、MOD 与待机服务。已发布完整包、开发机增量和临时实验分别维护，具体状态以各轮验收记录为准。
 
 ## 实机截图
 
