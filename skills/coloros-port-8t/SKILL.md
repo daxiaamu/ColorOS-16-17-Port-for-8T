@@ -62,7 +62,9 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 | 第一屏、循环启动、显示硬重置、QSPM等待 | [APEX/旧内核/框架启动](references/os17-boot-framework.md) |
 | Super扩容要求、预装从userdata回迁、完整包验收 | [Super与交付](references/os17-super-release.md) |
 | MOD/关于、无线硬件声明、互传、20分身、主题目录 | [应用与原生设置](references/os17-apps-settings.md) |
-| 供体原版互传、CryptoEng 10045/10023、NFC 一碰无响应 | [HKDF、预置密钥与回退](references/os17-oshare-crypto-nfc.md)：双向传输已验证候选与未解决的 NFC 分开记录 |
+| 供体原版互传、CryptoEng 10045/10023、NFC 一碰无响应 | [HKDF、预置密钥与回退](references/os17-oshare-crypto-nfc.md)：双向传输、一碰实体确认与 r6 本机验收分开记录 |
+| 小布加号缺 P 图/拍照问答/实景问答、Data 更新掩盖内置旧版 | [小布菜单与版本边界](references/os17-breeno-menu.md) |
+| 合版后大小写路径丢失、中文标签构建失败、ART 或内置 APK 验收 | [r6 合版与冷启动](references/os17-r6-consolidation.md) |
 | 全景息屏黑屏、无缝时钟成功后失效 | [AOD与OneShot条件](references/os17-aod-clock.md) |
 | 语音崩溃循环、traced重启、动画长帧 | [OS17性能实测](references/os17-performance.md) |
 
@@ -91,6 +93,6 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 
 ## 交付
 
-按“已固化且已验证 / 临时实验 / 未解决 / 已撤回”交代结果。资料公开只导出审阅过的说明、原创补丁/脚本和必要哈希，不上传原始工作区或设备数据。ColorOS 17 采用相同诊断方法，但需重新审核每个接口、feature、APEX 和字节码补丁；不直接套用 OS16 偏移和方法体。
+按“已固化且已验证 / 临时实验 / 未解决 / 已撤回”交代结果。资料公开只导出审阅过的说明、原创补丁/脚本和必要哈希，不上传原始工作区或设备数据。互联的私有协议材料、解封结果及含材料的产物不得收入公开 skill；机制说明不授予提取参考设备密钥的权限。ColorOS 17 采用相同诊断方法，但需重新审核每个接口、feature、APEX 和字节码补丁；不直接套用 OS16 偏移和方法体。
 
 待机耗电、重复原生服务退出及无线ADB测量干扰，阅读[OS17待机服务](references/os17-standby-services.md)。镜像修复、设备Global设置、长期功耗验收分别记录。
