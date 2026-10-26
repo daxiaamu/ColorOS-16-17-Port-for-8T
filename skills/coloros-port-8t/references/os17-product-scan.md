@@ -2,6 +2,8 @@
 
 本次同一根因影响相册 OppoGallery2（dev45）和游戏助手 OplusGames（dev47）。优先读实际 mountinfo 与 PackageManager 状态，不先改 APK 或向 userdata 再复制一份。
 
+后续 Wallpapers 缺失是不同原因：重打包丢 APK Signing Block，PMS 报 NO_CERTIFICATES，并让设置退回旧 UXDesign。不要重复加 symlink 或补旧页面；见[签名块与原生路由](os17-gallery-rhythm-personalization.md)。
+
 ## 现场差异
 
 APK 已在 /my_stock/port8t-reserve/system-apps/my_stock/priv-app 下，旧的 /my_stock/priv-app 嵌套 bind 路径也能看到文件；但 PMS 实际扫描的 /product/priv-app 下对应目录为空。Overlay 的 lowerdir 使用 /mnt/vendor/my_stock/priv-app，没有透过另一个路径上的嵌套 bind 自动看见应用。

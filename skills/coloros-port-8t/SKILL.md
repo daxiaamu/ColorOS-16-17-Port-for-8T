@@ -53,6 +53,8 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 | 晕动舒缓没有圆点、300% 音量能力 | [运动传感器与音量](references/os17-motion-volume.md) |
 | 原生安装器、COUI 风格、ADB 回退或 OPEX 重启 | [候选与已撤回实验](references/os17-native-installer.md) |
 | 酷安实况 Surface 切换失败、相册点击编辑退出 | [媒体兼容](references/os17-media-compat.md)：保留原生错误与回退，分别验收播放器和编辑器 |
+| AI消除依赖错误、舒眠开关无色温、新个性化未注册、分身后掉人脸反馈 | [相册／原生节律／个性化](references/os17-gallery-rhythm-personalization.md)：签名块、私有ABI、真实传感器与未复现边界 |
+| 自启动／最近任务锁定数量受限、分身GMS状态和主用户不一致 | [原生策略与GMS归属](references/os17-native-limits-clone-gms.md)：实际配置解析、共享设置列表和验证代理缓存 |
 | 默认强制模式、MOD SELinux 切换、状态误显示 | [SELinux 与 MOD](references/os17-selinux-mod.md)：精确标签、受限属性、真实内核状态 |
 | 无线回调空指针、隔空接听、GPU 崩溃、输入法/来电振动 | [运行时兼容](references/os17-runtime-compat.md)：协议/ABI/能力声明与实际场景 |
 | SIM已识别但电话不可用、IMS HAL unavailable | [恢复IMS HIDL兼容](references/os17-ims-hidl.md) |
@@ -78,7 +80,7 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 
 ## 新供体接续
 
-用户只提供新 ROM 时，先读私有工程已有的基线索引，默认沿用最近验收的同供体分支和 8T 硬件组合；在本项目工作区索引为 reports/donor-update-baseline.json。路径是项目约定，不是公开技能自带文件。区分已验收镜像与最新交付 ZIP。按补丁账本处理，变化项重新定位，撤回项不复活；缺旧输入或配方时先列出缺项并完成差异分析。
+用户只提供新 ROM 时，先读私有工程已有的基线索引，默认沿用最近验收的同供体分支和 8T 硬件组合。本项目OS16索引为 reports/donor-update-baseline.json，OS17先核对 reports/os17-donor-update-baseline.json 及其交付状态；没有索引时按明确的当前发布清单建立事实。路径只是私有工程约定，不是公开技能自带前提。区分已验收镜像与最新交付 ZIP，不能以测试手机落后的整分区回退新清单。按补丁账本处理，变化项重新定位，撤回项不复活；缺旧输入或配方时先列出缺项并完成差异分析。
 
 ## 公开实现与本地校验工具
 

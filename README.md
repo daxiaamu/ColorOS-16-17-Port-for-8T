@@ -2,7 +2,7 @@
 
 面向一加 8T 移植、调试与回归的 AI agent skill，由 **大侠阿木** 的实际移植记录整理。它提供决策方法、已验证案例、失败经验和离线校验工具，供后续移植工作复用。
 
-**本分支为 ColorOS-17：已增加 PLK110 ColorOS 17 → 一加8T的开发移植与实机诊断经验。** 最新专项更新为 2026-10-21 的[原版互传与 NFC 兼容调查](skills/coloros-port-8t/references/os17-oshare-crypto-nfc.md)：原版互传双向传输候选已获用户确认，尚未进入发布包；NFC 一碰互联仍未解决。这不是 ROM 下载仓库，也不是从原厂包一键生成全部修复的构建系统。
+**本分支为 ColorOS-17，记录 PLK110 ColorOS 17 → 一加8T的移植与实机回归经验。** 最新新增[相册 AI、原生舒眠与个性化注册](skills/coloros-port-8t/references/os17-gallery-rhythm-personalization.md)，并记录三分身后重启的人脸保留对照及未复现边界。此前原版互传／NFC兼容已合入20261020-r6，后继20261026整合及验收状态以[当前状态](skills/coloros-port-8t/references/os17-current-status.md)为准。这不是 ROM 下载仓库，也不是从原厂包一键生成全部修复的构建系统，不包含设备密钥。
 
 ## ColorOS 17 专项入口
 
