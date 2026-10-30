@@ -1,5 +1,9 @@
 # Super 容量、原生预装与完整包
 
+## 关键APK签名结构预检
+
+完整ZIP的CRC、分区哈希与DEX往返都不能发现ZIP条目之外的APK Signing Block丢失。20261028启动循环已定位到SettingsProvider/OplusExSystemService的该遗漏；后继构建在生成Super前，对最终system_ext中的两个服务及Settings/SystemUI增加签名块结构门禁。旧发布输入作为反例被准确拒绝，不能因其镜像哈希冻结就继续使用。结构检查不等于OEM密码学重签或新整包实机验收，见[签名块与启动循环](os17-apk-signer-bootloop.md)。
+
 ## 后继基线与 TAR 构建审计
 
 20261026 回归手机的资源组合落后于已验收 r7：前者缺通知音并不代表 r7 也缺。合包按最新冻结的15分区清单逐文件重放；不拿手机的旧整分区覆盖新的自启动、分身GMS或互传修复。已经存在且哈希一致的资源只核验，不重复叠加。

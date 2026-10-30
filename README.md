@@ -2,7 +2,9 @@
 
 面向一加 8T 移植、调试与回归的 AI agent skill，由 **大侠阿木** 的实际移植记录整理。它提供决策方法、已验证案例、失败经验和离线校验工具，供后续移植工作复用。
 
-**本分支为 ColorOS-17，记录 PLK110 ColorOS 17 → 一加8T的移植与实机回归经验。** 最新新增[相册 AI、原生舒眠与个性化注册](skills/coloros-port-8t/references/os17-gallery-rhythm-personalization.md)，并记录三分身后重启的人脸保留对照及未复现边界。此前原版互传／NFC兼容已合入20261020-r6，后继20261026整合及验收状态以[当前状态](skills/coloros-port-8t/references/os17-current-status.md)为准。这不是 ROM 下载仓库，也不是从原厂包一键生成全部修复的构建系统，不包含设备密钥。
+2026-10-31新增[关键APK签名块遗漏导致启动循环](skills/coloros-port-8t/references/os17-apk-signer-bootloop.md)：记录“优化应用1%～5%反复回退”的真实失败链、构建配方修复与签名结构门禁。最新交付与实机验收层级见[当前状态](skills/coloros-port-8t/references/os17-current-status.md)，不把旧整包离线通过等同于可正常启动。
+
+**本分支为 ColorOS-17，记录 PLK110 ColorOS 17 → 一加8T的移植与实机回归经验。** 最新维护至20261031启动修复与整包记录，同时保留[相册AI、原生舒眠与个性化注册](skills/coloros-port-8t/references/os17-gallery-rhythm-personalization.md)、分身GMS和原版互传/NFC的后继验收。交付与实机状态以[当前状态](skills/coloros-port-8t/references/os17-current-status.md)为准。这不是ROM下载仓库，也不是从原厂包一键生成全部修复的构建系统，不包含设备密钥。
 
 ## ColorOS 17 专项入口
 

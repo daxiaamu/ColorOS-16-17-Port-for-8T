@@ -67,6 +67,7 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 | 供体原版互传、CryptoEng 10045/10023、NFC 一碰无响应 | [HKDF、预置密钥与回退](references/os17-oshare-crypto-nfc.md)：双向传输、一碰实体确认与 r6 本机验收分开记录 |
 | 小布加号缺 P 图/拍照问答/实景问答、Data 更新掩盖内置旧版 | [小布菜单与版本边界](references/os17-breeno-menu.md) |
 | 合版后大小写路径丢失、中文标签构建失败、ART 或内置 APK 验收 | [r6 合版与冷启动](references/os17-r6-consolidation.md) |
+| 正在优化应用进度回退、settings authority 缺失、关键 APK 无 v2 签名块 | [APK签名块与启动循环](references/os17-apk-signer-bootloop.md)：ZIP外元数据、最终镜像门禁及普通启动验收 |
 | 全景息屏黑屏、无缝时钟成功后失效 | [AOD与OneShot条件](references/os17-aod-clock.md) |
 | 语音崩溃循环、traced重启、动画长帧 | [OS17性能实测](references/os17-performance.md) |
 
