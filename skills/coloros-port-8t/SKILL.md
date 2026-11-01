@@ -57,6 +57,7 @@ For OShare tile add/remove regressions, read [qs-component-migration](references
 | 自启动／最近任务锁定数量受限、分身GMS状态和主用户不一致 | [原生策略与GMS归属](references/os17-native-limits-clone-gms.md)：实际配置解析、共享设置列表和验证代理缓存 |
 | 默认强制模式、MOD SELinux 切换、状态误显示 | [SELinux 与 MOD](references/os17-selinux-mod.md)：精确标签、受限属性、真实内核状态 |
 | 无线回调空指针、隔空接听、GPU 崩溃、输入法/来电振动 | [运行时兼容](references/os17-runtime-compat.md)：协议/ABI/能力声明与实际场景 |
+| 间歇性无SIM、单/双卡切换后掉卡、UIM与物理槽对照 | [SIM识别与未解决边界](references/os17-sim-card-detection.md)：独立只读监听、手动插拔对齐和撤销临时ROOT |
 | SIM已识别但电话不可用、IMS HAL unavailable | [恢复IMS HIDL兼容](references/os17-ims-hidl.md) |
 | 小前置包能否略过、还原结果哈希失败 | [增量OTA链与verity范围](references/os17-ota-reconstruction.md) |
 | 新山之道切换后黑壁纸 | [初始布局与COZ2修复](references/os17-mountain-wallpaper.md) |
